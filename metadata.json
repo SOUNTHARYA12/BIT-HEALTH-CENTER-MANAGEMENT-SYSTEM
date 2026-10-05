@@ -1,0 +1,6 @@
+{
+  "name": "BIT Student Health Center System",
+  "description": "Patient appointment scheduling, doctor queue management, and medication stock control system for BIT campus health center.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
