@@ -13,6 +13,7 @@ import { PharmacyPortal } from './components/PharmacyPortal';
 import { AdminPortal } from './components/AdminPortal';
 import { ProfileModal } from './components/ProfileModal';
 import { fetchStockAlerts, logoutUser, fetchCurrentUser } from './services/api';
+import { logoutFirebaseAuth } from './firebase';
 import { Building2, PhoneCall } from 'lucide-react';
 
 export default function App() {
@@ -78,6 +79,7 @@ export default function App() {
     if (token) {
       logoutUser(token);
     }
+    logoutFirebaseAuth();
     localStorage.removeItem('bit_health_token');
     localStorage.removeItem('bit_health_user');
     sessionStorage.removeItem('bit_health_token');

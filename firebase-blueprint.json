@@ -1,0 +1,417 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "User profile with role-based access for BIT Student Health Center",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for user",
+          "maxLength": 128
+        },
+        "username": {
+          "type": "string",
+          "description": "Roll number or staff identifier",
+          "maxLength": 64
+        },
+        "name": {
+          "type": "string",
+          "description": "Full display name of the user",
+          "maxLength": 128
+        },
+        "role": {
+          "type": "string",
+          "description": "Role within the health center system",
+          "enum": ["student", "doctor", "pharmacist", "admin"]
+        },
+        "email": {
+          "type": "string",
+          "description": "User email address",
+          "maxLength": 128
+        },
+        "department": {
+          "type": "string",
+          "description": "Academic department or clinic section",
+          "maxLength": 128
+        },
+        "rollNumber": {
+          "type": "string",
+          "description": "Student registration or roll number",
+          "maxLength": 32
+        },
+        "phone": {
+          "type": "string",
+          "description": "Contact telephone number",
+          "maxLength": 32
+        },
+        "hostelBlock": {
+          "type": "string",
+          "description": "Campus residential hostel and room info",
+          "maxLength": 128
+        },
+        "gender": {
+          "type": "string",
+          "description": "Gender identity",
+          "enum": ["male", "female", "other"]
+        },
+        "bloodGroup": {
+          "type": "string",
+          "description": "Blood group code",
+          "maxLength": 16
+        },
+        "emergencyContact": {
+          "type": "string",
+          "description": "Parent or guardian contact name",
+          "maxLength": 128
+        },
+        "emergencyPhone": {
+          "type": "string",
+          "description": "Emergency contact telephone",
+          "maxLength": 32
+        },
+        "allergies": {
+          "type": "string",
+          "description": "Known allergies and medical cautions",
+          "maxLength": 256
+        },
+        "qualification": {
+          "type": "string",
+          "description": "Medical staff qualification degrees",
+          "maxLength": 128
+        },
+        "specialization": {
+          "type": "string",
+          "description": "Doctor specialty focus",
+          "maxLength": 128
+        },
+        "joinedDate": {
+          "type": "string",
+          "description": "Date joined or registered (YYYY-MM-DD)",
+          "maxLength": 32
+        }
+      },
+      "required": ["id", "name", "role", "email"]
+    },
+    "Doctor": {
+      "title": "Doctor",
+      "description": "Registered campus doctor and consultation status",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Doctor unique staff ID",
+          "maxLength": 64
+        },
+        "name": {
+          "type": "string",
+          "description": "Physician full title and name",
+          "maxLength": 128
+        },
+        "qualification": {
+          "type": "string",
+          "description": "Medical degrees and accreditations",
+          "maxLength": 128
+        },
+        "specialization": {
+          "type": "string",
+          "description": "Area of specialization",
+          "maxLength": 128
+        },
+        "roomNo": {
+          "type": "string",
+          "description": "Clinic consulting room number",
+          "maxLength": 64
+        },
+        "currentStatus": {
+          "type": "string",
+          "description": "Live availability state",
+          "enum": ["available", "in_consultation", "on_break", "offline"]
+        },
+        "photoUrl": {
+          "type": "string",
+          "description": "Doctor avatar or profile photo URL",
+          "maxLength": 512
+        }
+      },
+      "required": ["id", "name", "qualification", "specialization", "roomNo", "currentStatus"]
+    },
+    "Appointment": {
+      "title": "Appointment",
+      "description": "Clinic visit reservation, triage status, and consultation record",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Appointment document identifier",
+          "maxLength": 128
+        },
+        "tokenNumber": {
+          "type": "string",
+          "description": "Daily queue token badge number",
+          "maxLength": 32
+        },
+        "studentName": {
+          "type": "string",
+          "description": "Student patient full name",
+          "maxLength": 128
+        },
+        "rollNumber": {
+          "type": "string",
+          "description": "Student roll or register number",
+          "maxLength": 32
+        },
+        "department": {
+          "type": "string",
+          "description": "Student academic department",
+          "maxLength": 128
+        },
+        "gender": {
+          "type": "string",
+          "description": "Student gender",
+          "enum": ["male", "female", "other"]
+        },
+        "phone": {
+          "type": "string",
+          "description": "Student contact phone",
+          "maxLength": 32
+        },
+        "hostelBlock": {
+          "type": "string",
+          "description": "Student hostel room",
+          "maxLength": 128
+        },
+        "doctorId": {
+          "type": "string",
+          "description": "Attending doctor staff ID",
+          "maxLength": 64
+        },
+        "doctorName": {
+          "type": "string",
+          "description": "Attending doctor name",
+          "maxLength": 128
+        },
+        "appointmentDate": {
+          "type": "string",
+          "description": "Appointment date YYYY-MM-DD",
+          "maxLength": 32
+        },
+        "timeSlot": {
+          "type": "string",
+          "description": "Designated time slot",
+          "maxLength": 32
+        },
+        "chiefComplaint": {
+          "type": "string",
+          "description": "Reported symptoms or complaint",
+          "maxLength": 1000
+        },
+        "urgency": {
+          "type": "string",
+          "description": "Triage urgency rating",
+          "enum": ["normal", "urgent", "emergency"]
+        },
+        "status": {
+          "type": "string",
+          "description": "Consultation lifecycle status",
+          "enum": ["scheduled", "waiting", "in_consultation", "completed", "cancelled"]
+        },
+        "diagnosis": {
+          "type": "string",
+          "description": "Physician clinical diagnosis",
+          "maxLength": 1000
+        },
+        "doctorNotes": {
+          "type": "string",
+          "description": "Clinical consultation notes and instructions",
+          "maxLength": 2000
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "ISO timestamp of creation",
+          "maxLength": 64
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "ISO timestamp of last update",
+          "maxLength": 64
+        }
+      },
+      "required": ["id", "tokenNumber", "studentName", "rollNumber", "doctorId", "appointmentDate", "status"]
+    },
+    "Medicine": {
+      "title": "Medicine",
+      "description": "Dispensary pharmaceutical inventory record",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Medicine unique product ID",
+          "maxLength": 64
+        },
+        "name": {
+          "type": "string",
+          "description": "Medicine brand name",
+          "maxLength": 128
+        },
+        "genericName": {
+          "type": "string",
+          "description": "Active generic chemical formulation",
+          "maxLength": 128
+        },
+        "category": {
+          "type": "string",
+          "description": "Therapeutic medical category",
+          "maxLength": 64
+        },
+        "batchNumber": {
+          "type": "string",
+          "description": "Manufacturing batch reference code",
+          "maxLength": 64
+        },
+        "expiryDate": {
+          "type": "string",
+          "description": "Expiration date YYYY-MM-DD",
+          "maxLength": 32
+        },
+        "stockQuantity": {
+          "type": "number",
+          "description": "Current on-hand count in dispensary"
+        },
+        "minThreshold": {
+          "type": "number",
+          "description": "Minimum low-stock trigger threshold"
+        },
+        "unit": {
+          "type": "string",
+          "description": "Packaging unit format",
+          "maxLength": 32
+        },
+        "locationRack": {
+          "type": "string",
+          "description": "Storage rack location in dispensary",
+          "maxLength": 64
+        },
+        "unitPrice": {
+          "type": "number",
+          "description": "Unit pricing in INR"
+        },
+        "lastRestocked": {
+          "type": "string",
+          "description": "Date of latest replenishment",
+          "maxLength": 32
+        }
+      },
+      "required": ["id", "name", "category", "batchNumber", "stockQuantity", "minThreshold"]
+    },
+    "StockLog": {
+      "title": "StockLog",
+      "description": "Audit trail log for medicine dispensing, restock, or discard",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Log record unique identifier",
+          "maxLength": 128
+        },
+        "medicineId": {
+          "type": "string",
+          "description": "Referenced medicine ID",
+          "maxLength": 64
+        },
+        "medicineName": {
+          "type": "string",
+          "description": "Referenced medicine name",
+          "maxLength": 128
+        },
+        "type": {
+          "type": "string",
+          "description": "Stock adjustment action type",
+          "enum": ["received", "dispensed", "expired_discard", "adjustment"]
+        },
+        "quantity": {
+          "type": "number",
+          "description": "Quantity changed in this operation"
+        },
+        "previousStock": {
+          "type": "number",
+          "description": "Stock balance prior to action"
+        },
+        "newStock": {
+          "type": "number",
+          "description": "Stock balance following action"
+        },
+        "performedBy": {
+          "type": "string",
+          "description": "Pharmacist or staff name who performed action",
+          "maxLength": 128
+        },
+        "referenceId": {
+          "type": "string",
+          "description": "Associated appointment or order ID",
+          "maxLength": 128
+        },
+        "notes": {
+          "type": "string",
+          "description": "Operational notes or patient details",
+          "maxLength": 512
+        },
+        "timestamp": {
+          "type": "string",
+          "description": "Transaction timestamp",
+          "maxLength": 64
+        }
+      },
+      "required": ["id", "medicineId", "type", "quantity", "performedBy"]
+    },
+    "Admin": {
+      "title": "Admin",
+      "description": "Privileged administrator registration for health center governance",
+      "type": "object",
+      "properties": {
+        "email": {
+          "type": "string",
+          "description": "Admin email",
+          "maxLength": 128
+        },
+        "role": {
+          "type": "string",
+          "description": "Administrative authority role",
+          "enum": ["admin"]
+        },
+        "addedAt": {
+          "type": "string",
+          "description": "Timestamp when admin status was granted",
+          "maxLength": 64
+        }
+      },
+      "required": ["email", "role"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "User profiles with strict access control: Admin can view all profiles; non-admins can only view and edit their own"
+    },
+    "/doctors/{doctorId}": {
+      "schema": "Doctor",
+      "description": "Clinic doctors directory and real-time consulting status"
+    },
+    "/appointments/{appointmentId}": {
+      "schema": "Appointment",
+      "description": "Student health appointments, triage urgency, and doctor consultation notes"
+    },
+    "/medicines/{medicineId}": {
+      "schema": "Medicine",
+      "description": "Dispensary pharmaceutical inventory with stock counts and alerts"
+    },
+    "/stock_logs/{logId}": {
+      "schema": "StockLog",
+      "description": "Dispensary audit log tracking all dispensing and restocking events"
+    },
+    "/admins/{adminId}": {
+      "schema": "Admin",
+      "description": "Registry of system administrators authorized for high-privilege operations"
+    }
+  }
+}

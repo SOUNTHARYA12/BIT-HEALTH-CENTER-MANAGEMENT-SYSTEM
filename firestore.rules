@@ -1,0 +1,205 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Default Deny All Catch-All
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // --- Helper Functions ---
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() > 0 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isBootstrappedAdmin() {
+      return isSignedIn() && (
+        request.auth.token.email == 'sountharyar.ad23@bitsathy.ac.in' ||
+        request.auth.token.email == 'healthadmin@bitsathy.ac.in'
+      );
+    }
+
+    function isAdmin() {
+      return isBootstrappedAdmin() || (
+        isSignedIn() && exists(/databases/$(database)/documents/admins/$(request.auth.uid))
+      );
+    }
+
+    function isStaff() {
+      return isAdmin() || (
+        isSignedIn() && exists(/databases/$(database)/documents/users/$(request.auth.uid)) && (
+          get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role in ['doctor', 'pharmacist', 'admin']
+        )
+      );
+    }
+
+    function isDoctor() {
+      return isAdmin() || (
+        isSignedIn() && exists(/databases/$(database)/documents/users/$(request.auth.uid)) && (
+          get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'doctor'
+        )
+      );
+    }
+
+    function isPharmacist() {
+      return isAdmin() || (
+        isSignedIn() && exists(/databases/$(database)/documents/users/$(request.auth.uid)) && (
+          get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role in ['pharmacist', 'admin']
+        )
+      );
+    }
+
+    // --- Entity Validators ---
+
+    function isValidUser(data) {
+      return data.keys().hasAll(['id', 'name', 'role', 'email']) &&
+        data.id is string && data.id.size() <= 128 &&
+        data.name is string && data.name.size() > 0 && data.name.size() <= 128 &&
+        data.role in ['student', 'doctor', 'pharmacist', 'admin'] &&
+        data.email is string && data.email.size() <= 128;
+    }
+
+    function isValidDoctor(data) {
+      return data.keys().hasAll(['id', 'name', 'qualification', 'specialization', 'roomNo', 'currentStatus']) &&
+        data.id is string && data.id.size() <= 64 &&
+        data.name is string && data.name.size() <= 128 &&
+        data.currentStatus in ['available', 'in_consultation', 'on_break', 'offline'];
+    }
+
+    function isValidAppointment(data) {
+      return data.keys().hasAll(['id', 'tokenNumber', 'studentName', 'rollNumber', 'doctorId', 'appointmentDate', 'status']) &&
+        data.id is string && data.id.size() <= 128 &&
+        data.tokenNumber is string && data.tokenNumber.size() <= 32 &&
+        data.status in ['scheduled', 'waiting', 'in_consultation', 'completed', 'cancelled'];
+    }
+
+    function isValidMedicine(data) {
+      return data.keys().hasAll(['id', 'name', 'category', 'batchNumber', 'stockQuantity', 'minThreshold']) &&
+        data.id is string && data.id.size() <= 64 &&
+        data.name is string && data.name.size() <= 128 &&
+        data.stockQuantity is number && data.stockQuantity >= 0 &&
+        data.minThreshold is number && data.minThreshold >= 0;
+    }
+
+    function isValidStockLog(data) {
+      return data.keys().hasAll(['id', 'medicineId', 'type', 'quantity', 'performedBy']) &&
+        data.id is string && data.id.size() <= 128 &&
+        data.type in ['received', 'dispensed', 'expired_discard', 'adjustment'] &&
+        data.quantity is number;
+    }
+
+    // --- Collections ---
+
+    // Admin Registry
+    match /admins/{adminId} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin() && isValidId(adminId);
+    }
+
+    // Users (Strict Privacy: Admin can view all profiles; non-admins can only view and edit their own)
+    match /users/{userId} {
+      allow get: if isSignedIn() && isValidId(userId) && (
+        isAdmin() ||
+        request.auth.uid == userId ||
+        (resource != null && resource.data.email == request.auth.token.email)
+      );
+      allow list: if isAdmin();
+
+      allow create: if isSignedIn() && isValidId(userId) && isValidUser(incoming()) && (
+        isAdmin() ||
+        (request.auth.uid == userId && incoming().role == 'student')
+      );
+
+      allow update: if isSignedIn() && isValidId(userId) && isValidUser(incoming()) && (
+        isAdmin() || (
+          request.auth.uid == userId &&
+          incoming().role == existing().role &&
+          incoming().diff(existing()).affectedKeys().hasOnly([
+            'phone', 'emergencyContact', 'emergencyPhone', 'allergies', 'hostelBlock', 'bloodGroup', 'roomNo'
+          ])
+        )
+      );
+
+      allow delete: if isAdmin() && isValidId(userId);
+    }
+
+    // Doctors (Directory read by campus community; status updated by doctor or admin)
+    match /doctors/{doctorId} {
+      allow read: if isSignedIn();
+      allow create, delete: if isAdmin() && isValidId(doctorId);
+      allow update: if isSignedIn() && isValidId(doctorId) && isValidDoctor(incoming()) && (
+        isAdmin() ||
+        isDoctor() ||
+        incoming().diff(existing()).affectedKeys().hasOnly(['currentStatus'])
+      );
+    }
+
+    // Appointments (Students can manage their appointments; Doctors & Admin can consult and update status)
+    match /appointments/{appointmentId} {
+      allow get: if isSignedIn() && isValidId(appointmentId) && (
+        isAdmin() || isStaff() ||
+        resource.data.rollNumber == request.auth.uid ||
+        resource.data.studentEmail == request.auth.token.email
+      );
+
+      allow list: if isSignedIn() && (
+        isAdmin() || isStaff() ||
+        resource.data.rollNumber == request.auth.uid ||
+        resource.data.studentEmail == request.auth.token.email
+      );
+
+      allow create: if isSignedIn() && isValidId(appointmentId) && isValidAppointment(incoming()) && (
+        isAdmin() || isStaff() ||
+        incoming().status == 'scheduled' || incoming().status == 'waiting'
+      );
+
+      allow update: if isSignedIn() && isValidId(appointmentId) && isValidAppointment(incoming()) && (
+        isAdmin() ||
+        isDoctor() ||
+        (
+          resource.data.rollNumber == request.auth.uid &&
+          existing().status in ['scheduled', 'waiting'] &&
+          incoming().status == 'cancelled' &&
+          incoming().diff(existing()).affectedKeys().hasOnly(['status', 'updatedAt'])
+        )
+      );
+
+      allow delete: if isAdmin() && isValidId(appointmentId);
+    }
+
+    // Medicines / Dispensary Inventory
+    match /medicines/{medicineId} {
+      allow read: if isSignedIn();
+      allow create, delete: if isAdmin() && isValidId(medicineId);
+      allow update: if isSignedIn() && isValidId(medicineId) && isValidMedicine(incoming()) && (
+        isAdmin() || isPharmacist()
+      );
+    }
+
+    // Stock Audit Logs (Immutable audit trail)
+    match /stock_logs/{logId} {
+      allow read: if isSignedIn() && (isAdmin() || isPharmacist() || isDoctor());
+      allow create: if isSignedIn() && isValidId(logId) && isValidStockLog(incoming()) && (
+        isAdmin() || isPharmacist()
+      );
+      allow update, delete: if false; // Append-only audit trail
+    }
+
+    // Connection testing
+    match /test/{docId} {
+      allow read, write: if true;
+    }
+  }
+}
