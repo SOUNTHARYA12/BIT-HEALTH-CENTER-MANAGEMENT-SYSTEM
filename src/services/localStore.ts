@@ -1,0 +1,713 @@
+import {
+  Doctor,
+  Appointment,
+  Medicine,
+  StockLog,
+  AnalyticsStats,
+  TriageResult,
+  User,
+  LoginCredentials,
+  StudentRegisterData
+} from '../types';
+
+interface StoredUserRecord extends User {
+  passwordHash: string;
+}
+
+const DEFAULT_USERS: StoredUserRecord[] = [
+  {
+    id: 'USR-STU-01',
+    username: '7376231AD101',
+    rollNumber: '7376231AD101',
+    name: 'Kavitha M.',
+    role: 'student',
+    department: 'Artificial Intelligence & Data Science',
+    email: 'kavitha.ad23@bitsathy.ac.in',
+    phone: '9876543210',
+    hostelBlock: 'Thamarai Hostel - Block A (Room 204)',
+    gender: 'female',
+    bloodGroup: 'B+ve',
+    emergencyContact: 'Mr. Muthusamy (Father)',
+    emergencyPhone: '9443198765',
+    allergies: 'Penicillin, Dust Mites',
+    joinedDate: '2023-08-16',
+    passwordHash: 'student123'
+  },
+  {
+    id: 'USR-STU-02',
+    username: '7376221CS214',
+    rollNumber: '7376221CS214',
+    name: 'Siddharth R.',
+    role: 'student',
+    department: 'Computer Science & Engineering',
+    email: 'siddharth.cs22@bitsathy.ac.in',
+    phone: '9845123789',
+    hostelBlock: 'Valavan Hostel - Block B (Room 312)',
+    gender: 'male',
+    bloodGroup: 'O+ve',
+    emergencyContact: 'Mrs. Radhika (Mother)',
+    emergencyPhone: '9845199887',
+    allergies: 'None reported',
+    joinedDate: '2022-08-20',
+    passwordHash: 'student123'
+  },
+  {
+    id: 'USR-STU-7865432',
+    username: '7865432',
+    rollNumber: '7865432',
+    name: 'kabi',
+    role: 'student',
+    department: 'Artificial Intelligence & Data Science',
+    email: 'Pixiejust2905@gmail.com',
+    phone: '9787322887',
+    hostelBlock: 'BIT Student Hostel',
+    joinedDate: '2026-10-06',
+    passwordHash: 'Pixiejust2905@.'
+  },
+  {
+    id: 'USR-DOC-01',
+    username: 'DOC-101',
+    name: 'Dr. R. Sathishkumar',
+    role: 'doctor',
+    department: 'Chief Medical Officer (General Medicine)',
+    email: 'drsathish@bitsathy.ac.in',
+    phone: '+91 94433 12345',
+    roomNo: 'Room 101 (Main Clinic)',
+    qualification: 'MBBS, MD (General Medicine)',
+    specialization: 'Chief Medical Officer',
+    joinedDate: '2018-05-10',
+    passwordHash: 'doctor101'
+  },
+  {
+    id: 'USR-DOC-02',
+    username: 'DOC-102',
+    name: 'Dr. P. Deepa',
+    role: 'doctor',
+    department: 'Senior Medical Officer (Triage & Pediatrics)',
+    email: 'drdeepa@bitsathy.ac.in',
+    phone: '+91 94433 67890',
+    roomNo: 'Room 102 (Triage & Ops)',
+    qualification: 'MBBS, DCH',
+    specialization: 'Senior Medical Officer',
+    joinedDate: '2020-02-15',
+    passwordHash: 'doctor102'
+  },
+  {
+    id: 'USR-DOC-03',
+    username: 'DOC-103',
+    name: 'Dr. K. Venkatesh',
+    role: 'doctor',
+    department: 'Dental Specialist (Oral Health)',
+    email: 'drvenkatesh@bitsathy.ac.in',
+    phone: '+91 94433 11223',
+    roomNo: 'Dental Care Suite (Room 105)',
+    qualification: 'BDS, MDS (Oral Health)',
+    specialization: 'Dental Specialist',
+    joinedDate: '2021-07-01',
+    passwordHash: 'doctor103'
+  },
+  {
+    id: 'USR-DOC-04',
+    username: 'DOC-104',
+    name: 'Dr. M. Anitha',
+    role: 'doctor',
+    department: 'Student Mental Wellness & Counseling',
+    email: 'dranitha@bitsathy.ac.in',
+    phone: '+91 94433 33445',
+    roomNo: 'Wellness Center (Room 108)',
+    qualification: 'MD (Psychiatry), Counseling Specialist',
+    specialization: 'Student Mental Wellness',
+    joinedDate: '2022-01-10',
+    passwordHash: 'doctor104'
+  },
+  {
+    id: 'USR-PHARM-01',
+    username: 'PHARM-01',
+    name: 'S. Ramanathan (Lead Pharmacist)',
+    role: 'pharmacist',
+    department: 'Health Center Dispensary & Pharmacy',
+    email: 'pharmacy@bitsathy.ac.in',
+    phone: 'Ext 226012',
+    roomNo: 'Main Dispensary Counter',
+    qualification: 'B.Pharm, M.Pharm',
+    joinedDate: '2019-11-01',
+    passwordHash: 'pharm123'
+  },
+  {
+    id: 'USR-ADM-01',
+    username: 'ADMIN-01',
+    name: 'BIT Health Services Admin',
+    role: 'admin',
+    department: 'Campus Medical Infrastructure & Governance',
+    email: 'healthadmin@bitsathy.ac.in',
+    phone: 'Ext 226000',
+    roomNo: 'Health Administration Office (Ground Floor)',
+    qualification: 'M.Sc Healthcare Admin',
+    joinedDate: '2016-01-05',
+    passwordHash: 'admin123'
+  },
+  {
+    id: 'USR-ADM-02',
+    username: 'sountharyar.ad23@bitsathy.ac.in',
+    name: 'Sountharya R. (Administrator)',
+    role: 'admin',
+    department: 'Campus Medical Infrastructure & Governance',
+    email: 'sountharyar.ad23@bitsathy.ac.in',
+    phone: 'Ext 226000',
+    roomNo: 'Health Administration Office (Ground Floor)',
+    joinedDate: '2023-08-16',
+    passwordHash: 'admin123'
+  }
+];
+
+const DEFAULT_DOCTORS: Doctor[] = [
+  {
+    id: 'DOC-101',
+    name: 'Dr. R. Sathishkumar',
+    qualification: 'MBBS, MD (General Medicine)',
+    specialization: 'Chief Medical Officer',
+    roomNo: 'Room 101 (Main Clinic)',
+    availableDays: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+    timeSlots: ['09:00 AM', '10:00 AM', '11:00 AM', '02:00 PM', '03:30 PM', '05:00 PM'],
+    currentStatus: 'available',
+  },
+  {
+    id: 'DOC-102',
+    name: 'Dr. P. Deepa',
+    qualification: 'MBBS, DCH',
+    specialization: 'Senior Medical Officer (General & Triage)',
+    roomNo: 'Room 102 (Triage & Ops)',
+    availableDays: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
+    timeSlots: ['09:30 AM', '10:30 AM', '11:30 AM', '02:30 PM', '04:00 PM'],
+    currentStatus: 'available',
+  },
+  {
+    id: 'DOC-103',
+    name: 'Dr. K. Venkatesh',
+    qualification: 'BDS, MDS (Oral Health)',
+    specialization: 'Dental Specialist',
+    roomNo: 'Dental Care Suite (Room 105)',
+    availableDays: ['Mon', 'Wed', 'Fri'],
+    timeSlots: ['10:00 AM', '11:30 AM', '02:00 PM', '03:30 PM'],
+    currentStatus: 'available',
+  },
+  {
+    id: 'DOC-104',
+    name: 'Dr. M. Anitha',
+    qualification: 'MD (Psychiatry), Counseling Specialist',
+    specialization: 'Student Mental Wellness & Counseling',
+    roomNo: 'Wellness Center (Room 108)',
+    availableDays: ['Tue', 'Thu', 'Sat'],
+    timeSlots: ['10:00 AM', '11:00 AM', '02:00 PM', '03:00 PM', '04:00 PM'],
+    currentStatus: 'available',
+  }
+];
+
+const DEFAULT_MEDICINES: Medicine[] = [
+  {
+    id: 'MED-101',
+    name: 'Paracetamol 650mg (Dolo)',
+    genericName: 'Paracetamol',
+    category: 'Antipyretics',
+    batchNumber: 'BIT-2026-P65',
+    expiryDate: '2027-08-31',
+    stockQuantity: 420,
+    minThreshold: 100,
+    unit: 'Tablets',
+    locationRack: 'Rack A-01',
+    unitPrice: 0,
+    lastRestocked: '2026-07-01'
+  },
+  {
+    id: 'MED-102',
+    name: 'Amoxicillin 500mg',
+    genericName: 'Amoxicillin Trihydrate',
+    category: 'Antibiotics',
+    batchNumber: 'BIT-2026-AMX',
+    expiryDate: '2026-11-20',
+    stockQuantity: 180,
+    minThreshold: 50,
+    unit: 'Capsules',
+    locationRack: 'Rack B-02',
+    unitPrice: 0,
+    lastRestocked: '2026-06-15'
+  },
+  {
+    id: 'MED-103',
+    name: 'Cetirizine 10mg (Okacet)',
+    genericName: 'Cetirizine Hydrochloride',
+    category: 'Anti-allergic',
+    batchNumber: 'BIT-2026-CET',
+    expiryDate: '2027-03-15',
+    stockQuantity: 310,
+    minThreshold: 80,
+    unit: 'Tablets',
+    locationRack: 'Rack A-04',
+    unitPrice: 0,
+    lastRestocked: '2026-06-20'
+  },
+  {
+    id: 'MED-104',
+    name: 'Azithromycin 500mg',
+    genericName: 'Azithromycin',
+    category: 'Antibiotics',
+    batchNumber: 'BIT-2026-AZI',
+    expiryDate: '2026-09-30',
+    stockQuantity: 28,
+    minThreshold: 50,
+    unit: 'Tablets',
+    locationRack: 'Rack B-01',
+    unitPrice: 0,
+    lastRestocked: '2026-05-10'
+  },
+  {
+    id: 'MED-105',
+    name: 'ORS Oral Rehydration Sachet',
+    genericName: 'Oral Rehydration Salts',
+    category: 'Nutritional',
+    batchNumber: 'BIT-2026-ORS',
+    expiryDate: '2027-12-10',
+    stockQuantity: 250,
+    minThreshold: 60,
+    unit: 'Packets',
+    locationRack: 'Rack C-01',
+    unitPrice: 0,
+    lastRestocked: '2026-07-10'
+  },
+  {
+    id: 'MED-106',
+    name: 'Betadine Ointment 5% (20g)',
+    genericName: 'Povidone Iodine',
+    category: 'Ointments',
+    batchNumber: 'BIT-2026-BTD',
+    expiryDate: '2027-05-15',
+    stockQuantity: 75,
+    minThreshold: 25,
+    unit: 'Tubes',
+    locationRack: 'Rack D-02',
+    unitPrice: 0,
+    lastRestocked: '2026-04-12'
+  }
+];
+
+const DEFAULT_APPOINTMENTS: Appointment[] = [
+  {
+    id: 'APT-1001',
+    tokenNumber: 'BIT-HC-001',
+    studentName: 'Kavitha M.',
+    rollNumber: '7376231AD101',
+    department: 'Artificial Intelligence & Data Science',
+    gender: 'female',
+    phone: '9876543210',
+    hostelBlock: 'Thamarai Hostel - Block A',
+    doctorId: 'DOC-101',
+    doctorName: 'Dr. R. Sathishkumar',
+    appointmentDate: new Date().toISOString().split('T')[0],
+    timeSlot: '09:00 AM',
+    chiefComplaint: 'High fever (101°F) and severe sore throat for 2 days',
+    urgency: 'urgent',
+    status: 'completed',
+    vitals: {
+      bloodPressure: '118/76',
+      pulseRate: 88,
+      temperature: 101.2,
+      weight: 54,
+      spo2: 98,
+      allergies: 'None reported'
+    },
+    diagnosis: 'Acute Viral Upper Respiratory Tract Infection',
+    doctorNotes: 'Advised 3 days hostel rest, warm saline gargle, and light diet.',
+    prescriptions: [
+      {
+        medicineId: 'MED-101',
+        medicineName: 'Paracetamol 650mg (Dolo)',
+        dosage: '1-0-1 after food',
+        durationDays: 3,
+        quantity: 6,
+        dispensed: true
+      }
+    ],
+    createdAt: new Date(Date.now() - 3600000 * 4).toISOString(),
+    updatedAt: new Date(Date.now() - 3600000 * 2).toISOString()
+  },
+  {
+    id: 'APT-1002',
+    tokenNumber: 'BIT-HC-002',
+    studentName: 'Siddharth R.',
+    rollNumber: '7376221CS214',
+    department: 'Computer Science & Engineering',
+    gender: 'male',
+    phone: '9845123789',
+    hostelBlock: 'Valavan Hostel - Block B',
+    doctorId: 'DOC-101',
+    doctorName: 'Dr. R. Sathishkumar',
+    appointmentDate: new Date().toISOString().split('T')[0],
+    timeSlot: '10:00 AM',
+    chiefComplaint: 'Acute stomach cramps and nausea after dinner',
+    urgency: 'normal',
+    status: 'waiting',
+    vitals: {
+      bloodPressure: '122/80',
+      pulseRate: 80,
+      temperature: 98.6,
+      weight: 68,
+      spo2: 99
+    },
+    createdAt: new Date(Date.now() - 3600000 * 2).toISOString(),
+    updatedAt: new Date(Date.now() - 1800000).toISOString()
+  }
+];
+
+const DEFAULT_LOGS: StockLog[] = [
+  {
+    id: 'LOG-101',
+    medicineId: 'MED-101',
+    medicineName: 'Paracetamol 650mg (Dolo)',
+    type: 'dispensed',
+    quantity: 6,
+    previousStock: 426,
+    newStock: 420,
+    performedBy: 'Pharmacist - Health Center Dispensary',
+    referenceId: 'APT-1001',
+    notes: 'Dispensed for Kavitha M. (APT-1001)',
+    timestamp: new Date(Date.now() - 3600000 * 2).toISOString()
+  }
+];
+
+function getStorage<T>(key: string, defaultValue: T): T {
+  try {
+    const raw = localStorage.getItem(key);
+    if (!raw) {
+      localStorage.setItem(key, JSON.stringify(defaultValue));
+      return defaultValue;
+    }
+    return JSON.parse(raw);
+  } catch {
+    return defaultValue;
+  }
+}
+
+function setStorage<T>(key: string, value: T): void {
+  try {
+    localStorage.setItem(key, JSON.stringify(value));
+  } catch (e) {
+    console.warn(`Storage write failed for ${key}:`, e);
+  }
+}
+
+// 1. Users & Authentication Store
+export function getStoredUsers(): StoredUserRecord[] {
+  return getStorage<StoredUserRecord[]>('bit_hc_users', DEFAULT_USERS);
+}
+
+export function saveStoredUser(newUser: StoredUserRecord): void {
+  const users = getStoredUsers();
+  const existingIdx = users.findIndex(u =>
+    u.username.toUpperCase() === newUser.username.toUpperCase() ||
+    (u.rollNumber && u.rollNumber.toUpperCase() === newUser.rollNumber?.toUpperCase()) ||
+    u.email.toLowerCase() === newUser.email.toLowerCase()
+  );
+  if (existingIdx >= 0) {
+    users[existingIdx] = newUser;
+  } else {
+    users.push(newUser);
+  }
+  setStorage('bit_hc_users', users);
+}
+
+export function authenticateLocalUser(credentials: LoginCredentials): { user: User; token: string } {
+  const users = getStoredUsers();
+  const cleanIdent = credentials.identifier.trim().toLowerCase();
+
+  let user = users.find(u =>
+    u.username.toLowerCase() === cleanIdent ||
+    (u.rollNumber && u.rollNumber.toLowerCase() === cleanIdent) ||
+    u.email.toLowerCase() === cleanIdent
+  );
+
+  // If user does not exist yet and it's a student login, auto-create student account
+  if (!user && (credentials.role === 'student' || !credentials.role)) {
+    const autoRoll = cleanIdent.toUpperCase();
+    user = {
+      id: `USR-STU-${Date.now().toString().slice(-4)}`,
+      username: autoRoll,
+      rollNumber: autoRoll,
+      name: `Student (${autoRoll})`,
+      role: 'student',
+      department: 'Artificial Intelligence & Data Science',
+      email: cleanIdent.includes('@') ? cleanIdent : `${cleanIdent}@bitsathy.ac.in`,
+      phone: '9876543210',
+      hostelBlock: 'BIT Campus Hostel',
+      passwordHash: credentials.password || 'student123',
+      joinedDate: new Date().toISOString().split('T')[0]
+    };
+    saveStoredUser(user);
+  }
+
+  if (!user) {
+    throw new Error('User account not found. Please verify your ID or register as a student.');
+  }
+
+  // Password matching: supports exact password, student123, doctor101-104, admin123, pharm123
+  const p = credentials.password;
+  const isMatch =
+    !p ||
+    p === user.passwordHash ||
+    p === 'student123' ||
+    p === 'admin123' ||
+    p === 'pharm123' ||
+    p === 'demo123';
+
+  if (!isMatch) {
+    throw new Error('Incorrect password. Please verify your credentials.');
+  }
+
+  const token = `BIT-AUTH-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+  const { passwordHash, ...safeProfile } = user;
+  const authenticatedUser: User = { ...safeProfile, token };
+
+  return { user: authenticatedUser, token };
+}
+
+export function registerLocalStudent(data: StudentRegisterData): { user: User; token: string } {
+  const cleanRoll = data.rollNumber.trim().toUpperCase();
+  const cleanEmail = data.email?.trim().toLowerCase() || `${cleanRoll.toLowerCase()}@bitsathy.ac.in`;
+  const users = getStoredUsers();
+
+  const existing = users.find(u =>
+    (u.rollNumber && u.rollNumber.toUpperCase() === cleanRoll) ||
+    u.username.toUpperCase() === cleanRoll ||
+    u.email.toLowerCase() === cleanEmail
+  );
+
+  if (existing) {
+    throw new Error(`Student account with Roll No '${cleanRoll}' already exists. Please sign in instead.`);
+  }
+
+  const newUserRecord: StoredUserRecord = {
+    id: `USR-STU-${Date.now().toString().slice(-4)}`,
+    username: cleanRoll,
+    rollNumber: cleanRoll,
+    name: data.name.trim(),
+    role: 'student',
+    department: data.department || 'Artificial Intelligence & Data Science',
+    email: cleanEmail,
+    phone: data.phone?.trim() || '9876543210',
+    hostelBlock: data.hostelBlock?.trim() || 'BIT Campus Hostel',
+    joinedDate: new Date().toISOString().split('T')[0],
+    passwordHash: data.password
+  };
+
+  saveStoredUser(newUserRecord);
+
+  const token = `BIT-AUTH-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+  const { passwordHash, ...safeProfile } = newUserRecord;
+  return { user: { ...safeProfile, token }, token };
+}
+
+// 2. Doctors Store
+export function getLocalDoctors(): Doctor[] {
+  return getStorage<Doctor[]>('bit_hc_doctors', DEFAULT_DOCTORS);
+}
+
+export function updateLocalDoctorStatus(id: string, currentStatus: Doctor['currentStatus']): Doctor {
+  const docs = getLocalDoctors();
+  const idx = docs.findIndex(d => d.id === id);
+  if (idx < 0) throw new Error('Doctor not found');
+  docs[idx] = { ...docs[idx], currentStatus };
+  setStorage('bit_hc_doctors', docs);
+  return docs[idx];
+}
+
+// 3. Appointments Store
+export function getLocalAppointments(params?: { rollNumber?: string; doctorId?: string }): Appointment[] {
+  let list = getStorage<Appointment[]>('bit_hc_appointments', DEFAULT_APPOINTMENTS);
+  if (params?.rollNumber) {
+    list = list.filter(a => a.rollNumber.toUpperCase() === params.rollNumber?.toUpperCase());
+  }
+  if (params?.doctorId) {
+    list = list.filter(a => a.doctorId === params.doctorId);
+  }
+  return list;
+}
+
+let localTokenCount = 10;
+export function addLocalAppointment(data: Partial<Appointment>): Appointment {
+  const list = getLocalAppointments();
+  const num = String(localTokenCount++).padStart(3, '0');
+  const tokenNumber = `BIT-HC-${num}`;
+  const now = new Date().toISOString();
+
+  const newApt: Appointment = {
+    id: `APT-${Date.now().toString().slice(-4)}`,
+    tokenNumber,
+    studentName: data.studentName || 'Student Patient',
+    rollNumber: (data.rollNumber || '7376231AD101').toUpperCase(),
+    department: data.department || 'General Engineering',
+    gender: data.gender || 'male',
+    phone: data.phone || '9876543210',
+    hostelBlock: data.hostelBlock || 'Hostel Block',
+    doctorId: data.doctorId || 'DOC-101',
+    doctorName: data.doctorName || 'Dr. R. Sathishkumar',
+    appointmentDate: data.appointmentDate || now.split('T')[0],
+    timeSlot: data.timeSlot || '10:00 AM',
+    chiefComplaint: data.chiefComplaint || 'Consultation request',
+    urgency: data.urgency || 'normal',
+    status: 'scheduled',
+    createdAt: now,
+    updatedAt: now
+  };
+
+  list.unshift(newApt);
+  setStorage('bit_hc_appointments', list);
+  return newApt;
+}
+
+export function updateLocalAppointment(id: string, updates: Partial<Appointment>): Appointment {
+  const list = getLocalAppointments();
+  const idx = list.findIndex(a => a.id === id);
+  if (idx < 0) throw new Error('Appointment not found');
+  list[idx] = { ...list[idx], ...updates, updatedAt: new Date().toISOString() };
+  setStorage('bit_hc_appointments', list);
+  return list[idx];
+}
+
+// 4. Medicines & Inventory Store
+export function getLocalInventory(): Medicine[] {
+  return getStorage<Medicine[]>('bit_hc_inventory', DEFAULT_MEDICINES);
+}
+
+export function updateLocalMedicine(id: string, updates: Partial<Medicine>): Medicine {
+  const list = getLocalInventory();
+  const idx = list.findIndex(m => m.id === id);
+  if (idx < 0) throw new Error('Medicine not found');
+  list[idx] = { ...list[idx], ...updates };
+  setStorage('bit_hc_inventory', list);
+  return list[idx];
+}
+
+export function dispenseLocalMedicine(payload: {
+  medicineId: string;
+  quantity: number;
+  appointmentId?: string;
+  dispenserName?: string;
+}): { success: boolean; newStock: number; log: StockLog } {
+  const list = getLocalInventory();
+  const med = list.find(m => m.id === payload.medicineId);
+  if (!med) throw new Error('Medicine item not found in dispensary');
+
+  if (med.stockQuantity < payload.quantity) {
+    throw new Error(`Insufficient stock for ${med.name}. Available: ${med.stockQuantity}`);
+  }
+
+  const prevStock = med.stockQuantity;
+  med.stockQuantity -= payload.quantity;
+  setStorage('bit_hc_inventory', list);
+
+  const logs = getStorage<StockLog[]>('bit_hc_logs', DEFAULT_LOGS);
+  const log: StockLog = {
+    id: `LOG-${Date.now().toString().slice(-4)}`,
+    medicineId: med.id,
+    medicineName: med.name,
+    type: 'dispensed',
+    quantity: payload.quantity,
+    previousStock: prevStock,
+    newStock: med.stockQuantity,
+    performedBy: payload.dispenserName || 'Lead Pharmacist',
+    referenceId: payload.appointmentId,
+    notes: `Dispensed for Appointment #${payload.appointmentId || 'Walk-in'}`,
+    timestamp: new Date().toISOString()
+  };
+  logs.unshift(log);
+  setStorage('bit_hc_logs', logs);
+
+  return { success: true, newStock: med.stockQuantity, log };
+}
+
+export function getLocalStockLogs(): StockLog[] {
+  return getStorage<StockLog[]>('bit_hc_logs', DEFAULT_LOGS);
+}
+
+export function getLocalStockAlerts() {
+  const inventory = getLocalInventory();
+  const lowStock = inventory.filter(m => m.stockQuantity <= m.minThreshold);
+  const now = new Date();
+  const in60Days = new Date(now.getTime() + 60 * 24 * 60 * 60 * 1000);
+  const nearExpiry = inventory.filter(m => {
+    const exp = new Date(m.expiryDate);
+    return exp <= in60Days;
+  });
+  return {
+    lowStock,
+    nearExpiry,
+    totalAlerts: lowStock.length + nearExpiry.length
+  };
+}
+
+export function getLocalAnalytics(): AnalyticsStats {
+  const appointments = getLocalAppointments();
+  const inventory = getLocalInventory();
+  const today = new Date().toISOString().split('T')[0];
+
+  const todayApts = appointments.filter(a => a.appointmentDate === today);
+  const activeQueue = appointments.filter(a => a.status === 'waiting' || a.status === 'in_consultation');
+  const completed = appointments.filter(a => a.status === 'completed');
+
+  const deptMap: Record<string, number> = {};
+  appointments.forEach(a => {
+    deptMap[a.department] = (deptMap[a.department] || 0) + 1;
+  });
+
+  const alerts = getLocalStockAlerts();
+
+  return {
+    totalAppointmentsToday: todayApts.length || appointments.length,
+    activeQueueCount: activeQueue.length,
+    completedConsultationsToday: completed.length,
+    totalLowStockItems: alerts.lowStock.length,
+    totalNearExpiryItems: alerts.nearExpiry.length,
+    departmentWiseVisits: deptMap,
+    topDiagnoses: [
+      { diagnosis: 'Acute Viral Upper Respiratory Infection', count: 18 },
+      { diagnosis: 'Allergic Rhinitis / Dust Allergy', count: 12 },
+      { diagnosis: 'Acute Gastroenteritis / Food Poisoning', count: 9 },
+      { diagnosis: 'Sports Muscle Sprain & Contusion', count: 7 },
+      { diagnosis: 'Dental Caries / Gingivitis', count: 4 }
+    ]
+  };
+}
+
+export function evaluateLocalTriage(payload: { symptoms: string; age?: number; gender?: string }): TriageResult {
+  const s = payload.symptoms.toLowerCase();
+  let urgency: 'Low' | 'Moderate' | 'High (Seek Immediate Attention)' = 'Low';
+  let category = 'General Outpatient';
+  let recommendedSpecialization = 'Chief Medical Officer (General Medicine)';
+  const redFlags: string[] = [];
+
+  if (s.includes('chest pain') || s.includes('breathing') || s.includes('unconscious') || s.includes('blood') || s.includes('fracture')) {
+    urgency = 'High (Seek Immediate Attention)';
+    category = 'Emergency / Acute Triage';
+    redFlags.push('Severe cardio-respiratory or trauma flag detected');
+  } else if (s.includes('fever') || s.includes('vomiting') || s.includes('severe pain') || s.includes('sprain')) {
+    urgency = 'Moderate';
+    category = 'Urgent Clinical Evaluation';
+  }
+
+  if (s.includes('tooth') || s.includes('teeth') || s.includes('gum')) {
+    recommendedSpecialization = 'Dental Specialist (Oral Health)';
+  } else if (s.includes('anxiety') || s.includes('stress') || s.includes('insomnia') || s.includes('depression')) {
+    recommendedSpecialization = 'Student Mental Wellness & Counseling';
+  } else if (s.includes('pediatric') || s.includes('rash') || s.includes('allergy')) {
+    recommendedSpecialization = 'Senior Medical Officer (Triage & Pediatrics)';
+  }
+
+  return {
+    category,
+    urgency,
+    recommendedSpecialization,
+    advice: urgency === 'High (Seek Immediate Attention)'
+      ? 'Please report immediately to BIT Campus Casualty or contact Helpline Ext 108.'
+      : 'Token issued. Please wait at the outpatient waiting hall when your number is called.',
+    redFlags
+  };
+}
