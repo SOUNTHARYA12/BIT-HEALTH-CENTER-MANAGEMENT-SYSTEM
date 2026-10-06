@@ -404,12 +404,31 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
 
             {/* Error Message Alert */}
             {error && (
-              <div className="mb-6 bg-rose-50 border border-rose-200 text-rose-800 text-xs p-3.5 rounded-xl flex items-start space-x-2.5 animate-fadeIn">
-                <AlertCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
-                <div>
-                  <span className="font-semibold block">Authentication Notice</span>
-                  {error}
+              <div className="mb-6 bg-rose-50 border border-rose-200 text-rose-800 text-xs p-3.5 rounded-xl space-y-2 animate-fadeIn">
+                <div className="flex items-start space-x-2.5">
+                  <AlertCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
+                  <div>
+                    <span className="font-semibold block">Authentication Notice</span>
+                    {error}
+                  </div>
                 </div>
+                {(error.toLowerCase().includes('already exists') || error.toLowerCase().includes('already registered')) && (
+                  <div className="pt-2 border-t border-rose-200/80 flex items-center justify-between gap-2">
+                    <span className="text-[11px] text-rose-700">This student roll number is already registered.</span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setAuthMode('login');
+                        setSelectedRole('student');
+                        if (regRollNumber) setIdentifier(regRollNumber);
+                        setError(null);
+                      }}
+                      className="px-2.5 py-1 bg-teal-600 hover:bg-teal-700 text-white rounded-lg text-[11px] font-semibold cursor-pointer shadow-xs transition-colors shrink-0"
+                    >
+                      Switch to Sign In
+                    </button>
+                  </div>
+                )}
               </div>
             )}
 
