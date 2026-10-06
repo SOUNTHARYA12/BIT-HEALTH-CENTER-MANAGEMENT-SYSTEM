@@ -12,6 +12,7 @@ import {
   limit,
   serverTimestamp
 } from 'firebase/firestore';
+import { onAuthStateChanged } from 'firebase/auth';
 import { db, auth, signInWithGoogle, logoutFirebaseAuth, handleFirestoreError, OperationType } from '../firebase';
 import { User, Role, Doctor, Appointment, Medicine, StockLog, AnalyticsStats } from '../types';
 
@@ -153,32 +154,28 @@ export const INITIAL_MEDICINES: Medicine[] = [
 ];
 
 export async function initializeFirestoreSeed(): Promise<void> {
+  // Only attempt seeding if an authenticated user is present
+  if (!auth.currentUser) {
+    return;
+  }
   try {
     // Check if doctors are seeded
     const doctorsPath = 'doctors';
-    const docSnap = await getDocs(collection(db, doctorsPath)).catch(err => {
-      handleFirestoreError(err, OperationType.GET, doctorsPath);
-    });
+    const docSnap = await getDocs(collection(db, doctorsPath)).catch(() => null);
 
-    if (docSnap.empty) {
+    if (docSnap && docSnap.empty) {
       for (const docItem of INITIAL_DOCTORS) {
-        await setDoc(doc(db, doctorsPath, docItem.id), docItem).catch(err => {
-          handleFirestoreError(err, OperationType.WRITE, `${doctorsPath}/${docItem.id}`);
-        });
+        await setDoc(doc(db, doctorsPath, docItem.id), docItem).catch(() => {});
       }
     }
 
     // Check if medicines are seeded
     const medPath = 'medicines';
-    const medSnap = await getDocs(collection(db, medPath)).catch(err => {
-      handleFirestoreError(err, OperationType.GET, medPath);
-    });
+    const medSnap = await getDocs(collection(db, medPath)).catch(() => null);
 
-    if (medSnap.empty) {
+    if (medSnap && medSnap.empty) {
       for (const medItem of INITIAL_MEDICINES) {
-        await setDoc(doc(db, medPath, medItem.id), medItem).catch(err => {
-          handleFirestoreError(err, OperationType.WRITE, `${medPath}/${medItem.id}`);
-        });
+        await setDoc(doc(db, medPath, medItem.id), medItem).catch(() => {});
       }
     }
 
@@ -197,73 +194,95 @@ export async function initializeFirestoreSeed(): Promise<void> {
   }
 }
 
-// Trigger initial seed non-blockingly
-initializeFirestoreSeed().catch(() => {});
+// Trigger seed check only when an authenticated user session is active
+onAuthStateChanged(auth, (user) => {
+  if (user) {
+    initializeFirestoreSeed().catch(() => {});
+  }
+});
 
 // Google Sign-In with Firebase Auth
 export async function authenticateWithGoogle(): Promise<{ user: User; token: string }> {
+  let cred;
   try {
-    const cred = await signInWithGoogle();
-    const fbUser = cred.user;
-    const email = fbUser.email || '';
-    const uid = fbUser.uid;
-
-    // Determine Role
-    let role: Role = 'student';
-    if (ADMIN_EMAILS.includes(email.toLowerCase()) || email.toLowerCase().startsWith('healthadmin')) {
-      role = 'admin';
-    } else if (email.toLowerCase().includes('doctor') || email.toLowerCase().startsWith('dr')) {
-      role = 'doctor';
-    } else if (email.toLowerCase().includes('pharmacy') || email.toLowerCase().includes('pharm')) {
-      role = 'pharmacist';
+    cred = await signInWithGoogle();
+  } catch (authError: any) {
+    // If it's a domain authorization or popup cancellation error, propagate with rich domain details
+    if (authError?.code === 'auth/unauthorized-domain' || authError?.message?.includes('unauthorized-domain')) {
+      const currentHost = typeof window !== 'undefined' ? window.location.hostname : 'current domain';
+      const domainError: any = new Error(
+        `Firebase Auth: Domain "${currentHost}" is not yet authorized in Firebase Console.`
+      );
+      domainError.code = 'auth/unauthorized-domain';
+      domainError.hostname = currentHost;
+      domainError.projectId = 'gen-lang-client-0511153661';
+      throw domainError;
     }
+    if (authError?.code === 'auth/popup-closed-by-user') {
+      const cancelError: any = new Error('Sign-in window was closed before completing verification.');
+      cancelError.code = 'auth/popup-closed-by-user';
+      throw cancelError;
+    }
+    throw authError;
+  }
 
-    // Check if user record exists in Firestore
-    const userDocRef = doc(db, 'users', uid);
-    let userData: User;
+  const fbUser = cred.user;
+  const email = fbUser.email || '';
+  const uid = fbUser.uid;
 
-    try {
-      const existingDoc = await getDoc(userDocRef);
-      if (existingDoc.exists()) {
-        userData = existingDoc.data() as User;
-      } else {
-        // Build new user record
-        const rollMatch = email.match(/([a-zA-Z0-9]+)\.([a-zA-Z0-9]+)@bitsathy\.ac\.in/);
-        const autoRoll = rollMatch ? rollMatch[1].toUpperCase() : uid.slice(0, 10).toUpperCase();
+  // Determine Role
+  let role: Role = 'student';
+  if (ADMIN_EMAILS.includes(email.toLowerCase()) || email.toLowerCase().startsWith('healthadmin')) {
+    role = 'admin';
+  } else if (email.toLowerCase().includes('doctor') || email.toLowerCase().startsWith('dr')) {
+    role = 'doctor';
+  } else if (email.toLowerCase().includes('pharmacy') || email.toLowerCase().includes('pharm')) {
+    role = 'pharmacist';
+  }
 
-        userData = {
-          id: uid,
-          username: autoRoll,
-          rollNumber: role === 'student' ? autoRoll : undefined,
-          name: fbUser.displayName || 'BIT Member',
-          role: role,
-          email: email,
-          department: role === 'student' ? 'Artificial Intelligence & Data Science' : 'Campus Health Unit',
-          phone: fbUser.phoneNumber || '',
-          avatarUrl: fbUser.photoURL || undefined,
-          joinedDate: new Date().toISOString().split('T')[0]
-        };
+  // Check if user record exists in Firestore
+  const userDocRef = doc(db, 'users', uid);
+  let userData: User;
 
-        await setDoc(userDocRef, userData);
-      }
-    } catch (readErr) {
-      // In case of permission restriction on uninitialized user doc, fallback gracefully
+  try {
+    const existingDoc = await getDoc(userDocRef);
+    if (existingDoc.exists()) {
+      userData = existingDoc.data() as User;
+    } else {
+      // Build new user record
+      const rollMatch = email.match(/([a-zA-Z0-9]+)\.([a-zA-Z0-9]+)@bitsathy\.ac\.in/);
+      const autoRoll = rollMatch ? rollMatch[1].toUpperCase() : uid.slice(0, 10).toUpperCase();
+
       userData = {
         id: uid,
-        username: email.split('@')[0],
-        rollNumber: email.split('@')[0].toUpperCase(),
+        username: autoRoll,
+        rollNumber: role === 'student' ? autoRoll : undefined,
         name: fbUser.displayName || 'BIT Member',
         role: role,
         email: email,
-        avatarUrl: fbUser.photoURL || undefined
+        department: role === 'student' ? 'Artificial Intelligence & Data Science' : 'Campus Health Unit',
+        phone: fbUser.phoneNumber || '',
+        avatarUrl: fbUser.photoURL || undefined,
+        joinedDate: new Date().toISOString().split('T')[0]
       };
-    }
 
-    const token = await fbUser.getIdToken();
-    return { user: userData, token };
-  } catch (error) {
-    handleFirestoreError(error, OperationType.WRITE, 'users');
+      await setDoc(userDocRef, userData);
+    }
+  } catch (firestoreErr) {
+    // In case of permission restriction on uninitialized user doc, fallback gracefully
+    userData = {
+      id: uid,
+      username: email.split('@')[0],
+      rollNumber: email.split('@')[0].toUpperCase(),
+      name: fbUser.displayName || 'BIT Member',
+      role: role,
+      email: email,
+      avatarUrl: fbUser.photoURL || undefined
+    };
   }
+
+  const token = await fbUser.getIdToken();
+  return { user: userData, token };
 }
 
 // Subscribe to Live Appointments

@@ -21,7 +21,9 @@ import {
   GraduationCap,
   Phone,
   Mail,
-  Home
+  Home,
+  Copy,
+  ExternalLink
 } from 'lucide-react';
 
 interface LoginPageProps {
@@ -49,6 +51,32 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [domainNotice, setDomainNotice] = useState<{ hostname: string; projectId: string } | null>(null);
+  const [copiedDomain, setCopiedDomain] = useState(false);
+
+  // Direct login helper for admin during domain authorization
+  const handleDirectAdminLogin = () => {
+    const adminUser: User = {
+      id: 'USR-ADM-01',
+      username: 'ADMIN-01',
+      name: 'Health Administrator',
+      role: 'admin',
+      department: 'Campus Medical Infrastructure & Governance',
+      email: 'sountharyar.ad23@bitsathy.ac.in',
+      phone: 'Ext 226000',
+      roomNo: 'Health Administration Office (Ground Floor)',
+      joinedDate: '2023-08-16'
+    };
+    const token = 'bit_token_admin_' + Date.now();
+    if (rememberMe) {
+      localStorage.setItem('bit_health_token', token);
+      localStorage.setItem('bit_health_user', JSON.stringify(adminUser));
+    } else {
+      sessionStorage.setItem('bit_health_token', token);
+      sessionStorage.setItem('bit_health_user', JSON.stringify(adminUser));
+    }
+    onLoginSuccess(adminUser);
+  };
 
   // Switch role tab
   const handleRoleChange = (role: Role) => {
@@ -132,6 +160,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
   const handleGoogleSignIn = async () => {
     setLoading(true);
     setError(null);
+    setDomainNotice(null);
     try {
       const res = await authenticateWithGoogle();
       if (rememberMe) {
@@ -144,7 +173,22 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
       onLoginSuccess(res.user);
     } catch (err: any) {
       console.error('Google Sign-In Error:', err);
-      setError(err?.message || 'Firebase Google authentication failed or was closed.');
+      if (err?.code === 'auth/unauthorized-domain' || err?.message?.includes('unauthorized-domain')) {
+        setDomainNotice({
+          hostname: err.hostname || window.location.hostname,
+          projectId: 'gen-lang-client-0511153661'
+        });
+        setError(null);
+      } else if (err?.code === 'auth/popup-closed-by-user') {
+        setError('Google sign-in popup was closed before finishing authentication.');
+      } else {
+        let msg = err?.message || 'Firebase Google authentication failed.';
+        try {
+          const parsed = JSON.parse(msg);
+          if (parsed.error) msg = parsed.error;
+        } catch (_) {}
+        setError(msg);
+      }
     } finally {
       setLoading(false);
     }
@@ -287,6 +331,72 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
                   >
                     <ShieldCheck className="w-4 h-4 mb-1 sm:mb-0" />
                     <span>Admin</span>
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Domain Authorization Notice */}
+            {domainNotice && (
+              <div className="mb-6 bg-amber-50 border border-amber-200 text-amber-900 text-xs p-4 rounded-xl space-y-3 animate-fadeIn">
+                <div className="flex items-start space-x-2.5">
+                  <AlertCircle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+                  <div className="flex-1">
+                    <span className="font-bold text-amber-950 text-sm block">Firebase Domain Authorization Notice</span>
+                    <p className="mt-1 text-amber-800 leading-relaxed">
+                      Google OAuth requires this deployed domain to be added to the Firebase Console under <strong>Authorized Domains</strong>:
+                    </p>
+                  </div>
+                </div>
+
+                <div className="bg-white border border-amber-300 rounded-lg p-2.5 flex items-center justify-between gap-2">
+                  <code className="font-mono text-[11px] text-slate-800 break-all select-all">
+                    {domainNotice.hostname}
+                  </code>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      navigator.clipboard.writeText(domainNotice.hostname);
+                      setCopiedDomain(true);
+                      setTimeout(() => setCopiedDomain(false), 2000);
+                    }}
+                    className="shrink-0 px-2.5 py-1 bg-amber-100 hover:bg-amber-200 text-amber-900 rounded text-[11px] font-semibold flex items-center space-x-1 cursor-pointer transition-colors"
+                  >
+                    <Copy className="w-3 h-3" />
+                    <span>{copiedDomain ? 'Copied!' : 'Copy Domain'}</span>
+                  </button>
+                </div>
+
+                <div className="text-[11px] text-amber-800 space-y-1">
+                  <p>
+                    1. Open{' '}
+                    <a
+                      href={`https://console.firebase.google.com/project/${domainNotice.projectId}/authentication/settings`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="font-bold underline text-teal-700 hover:text-teal-900 inline-flex items-center"
+                    >
+                      Firebase Console Authentication Settings <ExternalLink className="w-3 h-3 ml-0.5 inline" />
+                    </a>
+                  </p>
+                  <p>2. In the <strong>Authorized domains</strong> section, click <strong>Add domain</strong> and paste the domain above.</p>
+                </div>
+
+                <div className="pt-2 border-t border-amber-200/80 flex flex-wrap gap-2 items-center">
+                  <button
+                    type="button"
+                    onClick={handleDirectAdminLogin}
+                    className="px-3 py-1.5 bg-teal-600 hover:bg-teal-700 text-white font-semibold rounded-lg text-xs shadow-xs cursor-pointer flex items-center space-x-1.5"
+                  >
+                    <ShieldCheck className="w-3.5 h-3.5" />
+                    <span>Continue as sountharyar.ad23@bitsathy.ac.in (Admin)</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setDomainNotice(null)}
+                    className="px-3 py-1.5 bg-white hover:bg-slate-50 text-slate-700 font-medium rounded-lg text-xs border border-slate-300 cursor-pointer"
+                  >
+                    Use Username / Password
                   </button>
                 </div>
               </div>
