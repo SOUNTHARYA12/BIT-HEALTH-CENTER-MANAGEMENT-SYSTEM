@@ -34,40 +34,48 @@ export const Navbar: React.FC<NavbarProps> = ({
   const isAdmin = currentUser?.role === 'admin';
 
   return (
-    <header className="bg-white/95 text-slate-900 shadow-sm border-b border-slate-200/80 sticky top-0 z-40 backdrop-blur-md">
-      {/* Top Emergency Strip */}
-      <div className="bg-slate-900 px-4 py-1.5 text-xs text-slate-200 border-b border-slate-800 flex justify-between items-center">
-        <div className="flex items-center space-x-3">
-          <span className="flex items-center text-rose-400 font-semibold animate-pulse">
-            <ShieldAlert className="w-3.5 h-3.5 mr-1" />
-            BIT Emergency Medical Hotline: Ext 108 / +91 4295 226000
-          </span>
-          <span className="hidden md:inline text-slate-600">|</span>
-          <span className="hidden md:inline text-slate-300">Campus Health Center - Sathyamangalam</span>
-        </div>
-        <div className="flex items-center space-x-4 text-slate-300">
-          <span>OPD Hours: 8:30 AM - 8:00 PM</span>
-          <span className="hidden sm:inline bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded text-[10px] font-medium border border-emerald-500/30">
-            24/7 Casualty Open
-          </span>
+    <header className="bg-white/95 text-slate-900 border-b border-slate-200/90 sticky top-0 z-40 backdrop-blur-md">
+      {/* Top Institutional Emergency Bar */}
+      <div className="bg-slate-950 px-4 py-1.5 text-xs text-slate-300 border-b border-slate-800/80">
+        <div className="max-w-7xl mx-auto flex flex-wrap justify-between items-center gap-2">
+          <div className="flex items-center space-x-2.5">
+            <span className="flex items-center text-rose-400 font-semibold tracking-wide">
+              <ShieldAlert className="w-3.5 h-3.5 mr-1.5" />
+              Emergency Casualty: Ext 108 · +91 4295 226000
+            </span>
+            <span className="hidden sm:inline text-slate-600">/</span>
+            <span className="hidden sm:inline text-slate-400">Campus Health Center, Sathyamangalam</span>
+          </div>
+          <div className="flex items-center space-x-3 text-slate-400 text-[11px]">
+            <span>OPD: 8:30 AM – 8:00 PM</span>
+            <span className="text-slate-600">·</span>
+            <span className="text-emerald-400 font-medium flex items-center">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse mr-1"></span>
+              24/7 Casualty Open
+            </span>
+          </div>
         </div>
       </div>
 
       {/* Main Header Bar */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-2.5 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
         {/* Brand / Logo */}
         <div className="flex items-center space-x-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-teal-600 to-emerald-500 flex items-center justify-center text-white font-bold shadow-sm">
-            <HeartPulse className="w-6 h-6 text-white" />
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-teal-700 via-teal-600 to-emerald-600 flex items-center justify-center text-white shadow-xs">
+            <HeartPulse className="w-5 h-5 text-white" />
           </div>
           <div>
             <div className="flex items-center space-x-2">
-              <h1 className="text-lg font-bold tracking-tight text-slate-900">BIT Student Health Center</h1>
-              <span className="bg-teal-50 text-teal-700 text-[10px] font-semibold px-2 py-0.5 rounded border border-teal-200">
-                Bannari Amman Institute of Technology
+              <h1 className="text-base sm:text-lg font-bold tracking-tight text-slate-950">
+                BIT Student Health Center
+              </h1>
+              <span className="text-[10px] uppercase font-bold text-teal-800 bg-teal-50 px-2 py-0.5 rounded border border-teal-200/80">
+                BIT Sathy
               </span>
             </div>
-            <p className="text-xs text-slate-500">Appointment Scheduling & Medication Stock Control System</p>
+            <p className="text-xs text-slate-500">
+              Bannari Amman Institute of Technology · Clinical Appointments & Medication Control
+            </p>
           </div>
         </div>
 
@@ -79,18 +87,17 @@ export const Navbar: React.FC<NavbarProps> = ({
               onClick={onOpenProfile}
               id="navbar-profile-btn"
               title="Click to view health center profile"
-              className="flex items-center space-x-2 bg-slate-50 hover:bg-teal-50/80 px-3 py-1.5 rounded-xl border border-slate-200 hover:border-teal-300 text-xs transition-all cursor-pointer group"
+              className="flex items-center space-x-2.5 bg-slate-50 hover:bg-teal-50/70 px-3 py-1.5 rounded-xl border border-slate-200 hover:border-teal-300 text-xs transition-colors cursor-pointer group"
             >
-              <div className="w-7 h-7 rounded-lg bg-teal-100 group-hover:bg-teal-600 text-teal-700 group-hover:text-white flex items-center justify-center font-bold transition-colors">
-                <UserCheck className="w-4 h-4" />
+              <div className="w-7 h-7 rounded-lg bg-teal-100 group-hover:bg-teal-600 text-teal-800 group-hover:text-white flex items-center justify-center font-bold text-xs transition-colors">
+                {currentUser.name ? currentUser.name.charAt(0).toUpperCase() : 'U'}
               </div>
               <div className="text-left hidden sm:block">
-                <div className="font-semibold text-slate-900 leading-none group-hover:text-teal-900 flex items-center gap-1">
+                <div className="font-semibold text-slate-900 group-hover:text-teal-900 leading-tight">
                   {currentUser.name}
-                  <span className="text-[10px] text-teal-600 font-normal">View</span>
                 </div>
-                <div className="text-[10px] text-slate-500 mt-0.5">
-                  {currentUser.rollNumber || currentUser.username} ({currentUser.role.toUpperCase()})
+                <div className="text-[11px] text-slate-500 font-mono">
+                  {currentUser.rollNumber || currentUser.username} · <span className="capitalize">{currentUser.role}</span>
                 </div>
               </div>
             </button>
@@ -98,14 +105,14 @@ export const Navbar: React.FC<NavbarProps> = ({
 
           {/* Role Navigation: ONLY Admin can switch portals; Non-admins are locked to their own authorized portal */}
           {isAdmin ? (
-            <div className="flex items-center space-x-1 bg-slate-100/80 p-1 rounded-xl border border-slate-200/80 text-xs overflow-x-auto">
+            <div className="flex items-center space-x-1 bg-slate-100 p-1 rounded-xl border border-slate-200 text-xs overflow-x-auto">
               <button
                 id="role-btn-student"
                 onClick={() => onRoleChange('student')}
-                className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg font-medium transition-all cursor-pointer ${
+                className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg font-semibold transition-colors cursor-pointer ${
                   currentRole === 'student'
-                    ? 'bg-teal-600 text-white shadow-sm'
-                    : 'text-slate-600 hover:text-slate-900 hover:bg-white/80'
+                    ? 'bg-teal-700 text-white shadow-xs'
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
                 }`}
               >
                 <User className="w-3.5 h-3.5" />
@@ -115,10 +122,10 @@ export const Navbar: React.FC<NavbarProps> = ({
               <button
                 id="role-btn-doctor"
                 onClick={() => onRoleChange('doctor')}
-                className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg font-medium transition-all cursor-pointer ${
+                className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg font-semibold transition-colors cursor-pointer ${
                   currentRole === 'doctor'
-                    ? 'bg-teal-600 text-white shadow-sm'
-                    : 'text-slate-600 hover:text-slate-900 hover:bg-white/80'
+                    ? 'bg-teal-700 text-white shadow-xs'
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
                 }`}
               >
                 <Stethoscope className="w-3.5 h-3.5" />
@@ -128,10 +135,10 @@ export const Navbar: React.FC<NavbarProps> = ({
               <button
                 id="role-btn-pharmacist"
                 onClick={() => onRoleChange('pharmacist')}
-                className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg font-medium transition-all relative cursor-pointer ${
+                className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg font-semibold transition-colors relative cursor-pointer ${
                   currentRole === 'pharmacist'
-                    ? 'bg-teal-600 text-white shadow-sm'
-                    : 'text-slate-600 hover:text-slate-900 hover:bg-white/80'
+                    ? 'bg-teal-700 text-white shadow-xs'
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
                 }`}
               >
                 <Pill className="w-3.5 h-3.5" />
@@ -146,10 +153,10 @@ export const Navbar: React.FC<NavbarProps> = ({
               <button
                 id="role-btn-admin"
                 onClick={() => onRoleChange('admin')}
-                className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg font-medium transition-all cursor-pointer ${
+                className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg font-semibold transition-colors cursor-pointer ${
                   currentRole === 'admin'
-                    ? 'bg-teal-600 text-white shadow-sm'
-                    : 'text-slate-600 hover:text-slate-900 hover:bg-white/80'
+                    ? 'bg-teal-700 text-white shadow-xs'
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
                 }`}
               >
                 <Activity className="w-3.5 h-3.5" />
@@ -159,21 +166,21 @@ export const Navbar: React.FC<NavbarProps> = ({
           ) : (
             /* Non-Admin Portal Indicator & Private Profile Access */
             <div className="flex items-center space-x-2">
-              <div className="flex items-center space-x-1.5 bg-teal-50 border border-teal-200 px-3 py-1.5 rounded-xl text-xs font-semibold text-teal-800">
+              <div className="flex items-center space-x-1.5 bg-teal-50 border border-teal-200 px-3 py-1.5 rounded-xl text-xs font-semibold text-teal-900">
                 {currentUser?.role === 'student' && <User className="w-3.5 h-3.5 text-teal-700" />}
                 {currentUser?.role === 'doctor' && <Stethoscope className="w-3.5 h-3.5 text-teal-700" />}
                 {currentUser?.role === 'pharmacist' && <Pill className="w-3.5 h-3.5 text-teal-700" />}
                 <span className="capitalize">{currentUser?.role} Portal</span>
-                <span className="text-[10px] bg-teal-200/70 text-teal-900 px-1.5 py-0.2 rounded font-mono">
+                <span className="text-[10px] bg-teal-200/70 text-teal-950 px-1.5 py-0.2 rounded font-mono">
                   Authorized
                 </span>
               </div>
 
               <button
                 onClick={onOpenProfile}
-                className="flex items-center space-x-1 px-3 py-1.5 bg-white hover:bg-slate-50 text-slate-700 rounded-xl border border-slate-200 text-xs font-semibold transition-all cursor-pointer shadow-sm"
+                className="flex items-center space-x-1.5 px-3 py-1.5 bg-white hover:bg-slate-50 text-slate-700 rounded-xl border border-slate-200 text-xs font-semibold transition-colors cursor-pointer shadow-xs"
               >
-                <UserCheck className="w-3.5 h-3.5 text-teal-600" />
+                <UserCheck className="w-3.5 h-3.5 text-teal-700" />
                 <span>My Profile</span>
               </button>
             </div>
@@ -185,7 +192,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               id="navbar-logout-btn"
               onClick={onLogout}
               title="Sign Out of Portal"
-              className="flex items-center space-x-1 px-3 py-2 bg-slate-100 hover:bg-rose-50 text-slate-700 hover:text-rose-700 rounded-xl border border-slate-200 hover:border-rose-200 text-xs font-semibold transition-all cursor-pointer"
+              className="flex items-center space-x-1.5 px-3 py-1.5 bg-slate-100 hover:bg-rose-50 text-slate-700 hover:text-rose-700 rounded-xl border border-slate-200 hover:border-rose-200 text-xs font-semibold transition-colors cursor-pointer"
             >
               <LogOut className="w-3.5 h-3.5" />
               <span className="hidden md:inline">Sign Out</span>

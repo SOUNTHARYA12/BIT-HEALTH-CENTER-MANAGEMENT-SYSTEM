@@ -386,6 +386,54 @@
         }
       },
       "required": ["email", "role"]
+    },
+    "OnlineConsultation": {
+      "title": "OnlineConsultation",
+      "description": "Student online doctor consultation requests, real-time consultation chats, and doctor digital prescriptions",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique consultation document ID",
+          "maxLength": 128
+        },
+        "consultationNumber": {
+          "type": "string",
+          "description": "Consultation reference code (e.g. BIT-OC-101)",
+          "maxLength": 32
+        },
+        "studentRoll": {
+          "type": "string",
+          "description": "Student Roll Number",
+          "maxLength": 32
+        },
+        "studentName": {
+          "type": "string",
+          "description": "Name of consulting student",
+          "maxLength": 128
+        },
+        "doctorId": {
+          "type": "string",
+          "description": "Assigned doctor ID",
+          "maxLength": 64
+        },
+        "doctorName": {
+          "type": "string",
+          "description": "Assigned doctor full name",
+          "maxLength": 128
+        },
+        "healthConcern": {
+          "type": "string",
+          "description": "Student symptoms and health description",
+          "maxLength": 2048
+        },
+        "status": {
+          "type": "string",
+          "description": "Consultation workflow lifecycle state",
+          "enum": ["pending", "accepted", "in_consultation", "completed", "rejected"]
+        }
+      },
+      "required": ["id", "consultationNumber", "studentRoll", "doctorId", "healthConcern", "status"]
     }
   },
   "firestore": {
@@ -400,6 +448,10 @@
     "/appointments/{appointmentId}": {
       "schema": "Appointment",
       "description": "Student health appointments, triage urgency, and doctor consultation notes"
+    },
+    "/consultations/{consultationId}": {
+      "schema": "OnlineConsultation",
+      "description": "Student online doctor consultation records, live messaging, and prescriptions"
     },
     "/medicines/{medicineId}": {
       "schema": "Medicine",

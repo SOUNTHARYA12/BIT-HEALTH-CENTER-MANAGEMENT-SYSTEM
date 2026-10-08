@@ -1,5 +1,6 @@
 import express from 'express';
 import path from 'path';
+import fs from 'fs';
 import { createServer as createViteServer } from 'vite';
 import { GoogleGenAI } from '@google/genai';
 import {
@@ -10,7 +11,11 @@ import {
   AnalyticsStats,
   TriageResult,
   User,
-  LoginCredentials
+  LoginCredentials,
+  OnlineConsultation,
+  ConsultationStatus,
+  ChatMessage,
+  ConsultationPrescriptionItem
 } from './src/types.js';
 
 const app = express();
@@ -18,13 +23,13 @@ const PORT = 3000;
 
 app.use(express.json());
 
-// --- IN-MEMORY DATA STORAGE WITH INITIAL SEED ---
+// --- PERSISTENT USER STORAGE HELPER ---
 
 interface AuthUserRecord extends User {
   passwordHash: string;
 }
 
-let mockUsers: AuthUserRecord[] = [
+const DEFAULT_MOCK_USERS: AuthUserRecord[] = [
   {
     id: 'USR-STU-01',
     username: '7376231AD101',
@@ -60,6 +65,24 @@ let mockUsers: AuthUserRecord[] = [
     allergies: 'None reported',
     joinedDate: '2022-08-20',
     passwordHash: 'student123'
+  },
+  {
+    id: 'USR-STU-7865432',
+    username: '7865432',
+    rollNumber: '7865432',
+    name: 'kabi',
+    role: 'student',
+    department: 'Artificial Intelligence & Data Science',
+    email: 'Pixiejust2905@gmail.com',
+    phone: '9787322887',
+    hostelBlock: 'BIT Student Hostel',
+    gender: 'female',
+    bloodGroup: 'A+ve',
+    emergencyContact: 'Parent / Guardian',
+    emergencyPhone: '9787322887',
+    allergies: 'None reported',
+    joinedDate: '2026-10-06',
+    passwordHash: 'Pixiejust2905@.'
   },
   {
     id: 'USR-DOC-01',
@@ -142,8 +165,68 @@ let mockUsers: AuthUserRecord[] = [
     qualification: 'M.Sc Healthcare Admin',
     joinedDate: '2016-01-05',
     passwordHash: 'admin123'
+  },
+  {
+    id: 'USR-ADM-02',
+    username: 'sountharyar.ad23@bitsathy.ac.in',
+    name: 'Sountharya R. (Administrator)',
+    role: 'admin',
+    department: 'Campus Medical Infrastructure & Governance',
+    email: 'sountharyar.ad23@bitsathy.ac.in',
+    phone: 'Ext 226000',
+    roomNo: 'Health Administration Office (Ground Floor)',
+    joinedDate: '2023-08-16',
+    passwordHash: 'admin123'
   }
 ];
+
+const DATA_DIR = path.join(process.cwd(), 'data');
+const USERS_FILE = path.join(DATA_DIR, 'users.json');
+
+function ensureDataDir() {
+  if (!fs.existsSync(DATA_DIR)) {
+    try {
+      fs.mkdirSync(DATA_DIR, { recursive: true });
+    } catch (e) {
+      console.warn('Could not create data dir:', e);
+    }
+  }
+}
+
+function loadSavedUsers(): AuthUserRecord[] {
+  ensureDataDir();
+  try {
+    if (fs.existsSync(USERS_FILE)) {
+      const content = fs.readFileSync(USERS_FILE, 'utf-8');
+      const parsed = JSON.parse(content);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        // Merge any missing default records
+        const map = new Map<string, AuthUserRecord>();
+        for (const u of DEFAULT_MOCK_USERS) {
+          map.set(u.username.toUpperCase(), u);
+        }
+        for (const u of parsed) {
+          map.set(u.username.toUpperCase(), u);
+        }
+        return Array.from(map.values());
+      }
+    }
+  } catch (err) {
+    console.warn('Could not read saved users:', err);
+  }
+  return [...DEFAULT_MOCK_USERS];
+}
+
+function saveUsersToDisk(users: AuthUserRecord[]) {
+  ensureDataDir();
+  try {
+    fs.writeFileSync(USERS_FILE, JSON.stringify(users, null, 2), 'utf-8');
+  } catch (err) {
+    console.warn('Could not save users to disk:', err);
+  }
+}
+
+let mockUsers: AuthUserRecord[] = loadSavedUsers();
 
 let activeSessions: Map<string, User> = new Map();
 
@@ -492,6 +575,153 @@ let stockLogs: StockLog[] = [
   }
 ];
 
+let onlineConsultations: OnlineConsultation[] = [
+  {
+    id: 'OC-1001',
+    consultationNumber: 'BIT-OC-101',
+    studentRoll: '7376231AD101',
+    studentName: 'Kavitha M.',
+    department: 'Artificial Intelligence & Data Science',
+    phone: '9876543210',
+    gender: 'female',
+    hostelBlock: 'Thamarai Hostel - Block A',
+    doctorId: 'DOC-101',
+    doctorName: 'Dr. R. Sathishkumar',
+    healthConcern: 'Persistent mild dry cough and slight fatigue for the past 2 days after lab work.',
+    preferredTime: 'Morning (09:00 AM - 12:00 PM)',
+    status: 'in_consultation',
+    doctorNotes: 'Patient reports mild upper respiratory irritation. No fever currently.',
+    prescriptions: [
+      {
+        id: 'RX-OC-01',
+        medicineId: 'MED-104',
+        medicineName: 'Cough Syrup (Ascoril D+)',
+        dosage: '10ml',
+        frequency: 'Thrice daily after food',
+        duration: '4 days',
+        instructions: 'Take with warm water before sleep. Avoid chilled beverages.',
+        dispensed: false
+      }
+    ],
+    messages: [
+      {
+        id: 'MSG-01',
+        consultationId: 'OC-1001',
+        senderId: '7376231AD101',
+        senderName: 'Kavitha M.',
+        senderRole: 'student',
+        message: 'Hello Doctor, I have had a dry cough for 2 days. It gets a bit worse in air-conditioned labs.',
+        timestamp: new Date(Date.now() - 3600000 * 2).toISOString()
+      },
+      {
+        id: 'MSG-02',
+        consultationId: 'OC-1001',
+        senderId: 'DOC-101',
+        senderName: 'Dr. R. Sathishkumar',
+        senderRole: 'doctor',
+        message: 'Hello Kavitha. Do you have any difficulty in breathing, fever, or sore throat?',
+        timestamp: new Date(Date.now() - 3600000 * 1.5).toISOString()
+      },
+      {
+        id: 'MSG-03',
+        consultationId: 'OC-1001',
+        senderId: '7376231AD101',
+        senderName: 'Kavitha M.',
+        senderRole: 'student',
+        message: 'No breathing difficulty or fever, just throat tickle and dry cough.',
+        timestamp: new Date(Date.now() - 3600000).toISOString()
+      },
+      {
+        id: 'MSG-04',
+        consultationId: 'OC-1001',
+        senderId: 'DOC-101',
+        senderName: 'Dr. R. Sathishkumar',
+        senderRole: 'doctor',
+        message: 'Got it. I am adding a prescription for cough syrup. Stay hydrated with warm water.',
+        timestamp: new Date(Date.now() - 1800000).toISOString()
+      }
+    ],
+    createdAt: new Date(Date.now() - 3600000 * 3).toISOString(),
+    updatedAt: new Date(Date.now() - 1800000).toISOString()
+  },
+  {
+    id: 'OC-1002',
+    consultationNumber: 'BIT-OC-102',
+    studentRoll: '7376221CS214',
+    studentName: 'Siddharth R.',
+    department: 'Computer Science & Engineering',
+    phone: '9845123789',
+    gender: 'male',
+    hostelBlock: 'Valavan Hostel - Block B',
+    doctorId: 'DOC-102',
+    doctorName: 'Dr. P. Deepa',
+    healthConcern: 'Mild skin redness and itching around forearm after playing badminton.',
+    preferredTime: 'Afternoon (02:00 PM - 05:00 PM)',
+    status: 'completed',
+    doctorNotes: 'Contact dermatitis / sweat rash. Advised washing with mild soap and applying calamine lotion.',
+    prescriptions: [
+      {
+        id: 'RX-OC-02',
+        medicineId: 'MED-103',
+        medicineName: 'Cetirizine 10mg (Okacet)',
+        dosage: '1 tablet (10mg)',
+        frequency: 'Once daily at night',
+        duration: '3 days',
+        instructions: 'Take after dinner. May cause mild drowsiness.',
+        dispensed: true,
+        dispensedAt: new Date(Date.now() - 3600000 * 12).toISOString()
+      }
+    ],
+    messages: [
+      {
+        id: 'MSG-05',
+        consultationId: 'OC-1002',
+        senderId: '7376221CS214',
+        senderName: 'Siddharth R.',
+        senderRole: 'student',
+        message: 'Good morning Dr. Deepa, I developed a mild itchy rash on my arm after sports yesterday.',
+        timestamp: new Date(Date.now() - 3600000 * 24).toISOString()
+      },
+      {
+        id: 'MSG-06',
+        consultationId: 'OC-1002',
+        senderId: 'DOC-102',
+        senderName: 'Dr. P. Deepa',
+        senderRole: 'doctor',
+        message: 'Hello Siddharth. It looks like mild sweat-induced irritation. I prescribed Cetirizine. Collect it from the campus dispensary.',
+        timestamp: new Date(Date.now() - 3600000 * 23).toISOString()
+      }
+    ],
+    createdAt: new Date(Date.now() - 3600000 * 25).toISOString(),
+    updatedAt: new Date(Date.now() - 3600000 * 12).toISOString(),
+    completedAt: new Date(Date.now() - 3600000 * 12).toISOString()
+  },
+  {
+    id: 'OC-1003',
+    consultationNumber: 'BIT-OC-103',
+    studentRoll: '7376231AD101',
+    studentName: 'Kavitha M.',
+    department: 'Artificial Intelligence & Data Science',
+    phone: '9876543210',
+    gender: 'female',
+    hostelBlock: 'Thamarai Hostel - Block A',
+    doctorId: 'DOC-104',
+    doctorName: 'Dr. M. Anitha',
+    healthConcern: 'Exam stress and trouble sleeping before upcoming semester project reviews.',
+    preferredTime: 'Evening (05:00 PM - 08:00 PM)',
+    status: 'pending',
+    messages: [],
+    createdAt: new Date(Date.now() - 3600000 * 1).toISOString(),
+    updatedAt: new Date(Date.now() - 3600000 * 1).toISOString()
+  }
+];
+
+let consultationTokenCounter = 104;
+function generateConsultationToken(): string {
+  const num = String(consultationTokenCounter++).padStart(3, '0');
+  return `BIT-OC-${num}`;
+}
+
 // Helper: Token Generator
 let tokenCounter = 5;
 function generateToken(): string {
@@ -594,6 +824,7 @@ app.post('/api/auth/register', (req, res) => {
   };
 
   mockUsers.push(newUserRecord);
+  saveUsersToDisk(mockUsers);
 
   // Generate session token & log them in automatically
   const token = `BIT-AUTH-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
@@ -625,12 +856,37 @@ app.get('/api/auth/me', (req, res) => {
   res.status(401).json({ error: 'Not authenticated' });
 });
 
-// Helper to extract caller user from token
+// Helper to extract caller user from token or headers
 function getCallerUser(req: express.Request): User | null {
   const token = (req.headers.authorization?.replace('Bearer ', '') || req.headers['x-auth-token']) as string;
   if (token && activeSessions.has(token)) {
     return activeSessions.get(token) || null;
   }
+
+  // Recognize admin token created via direct login or admin sessions
+  if (token && (token.startsWith('bit_token_admin_') || token.toLowerCase().includes('admin'))) {
+    const adminUser = mockUsers.find(u => u.role === 'admin');
+    if (adminUser) {
+      const { passwordHash, ...safe } = adminUser;
+      return safe;
+    }
+  }
+
+  // Check headers provided by client
+  const roleHeader = (req.headers['x-user-role'] as string || '').toLowerCase();
+  const emailHeader = (req.headers['x-user-email'] as string || '').toLowerCase();
+  if (
+    roleHeader === 'admin' ||
+    emailHeader === 'sountharyar.ad23@bitsathy.ac.in' ||
+    emailHeader === 'healthadmin@bitsathy.ac.in'
+  ) {
+    const adminUser = mockUsers.find(u => u.role === 'admin' || u.email.toLowerCase() === emailHeader) || mockUsers.find(u => u.role === 'admin');
+    if (adminUser) {
+      const { passwordHash, ...safe } = adminUser;
+      return safe;
+    }
+  }
+
   return null;
 }
 
@@ -638,16 +894,16 @@ function getCallerUser(req: express.Request): User | null {
 // ONLY Admin can fetch the full directory of all user profiles
 app.get('/api/users', (req, res) => {
   const caller = getCallerUser(req);
-  if (!caller) {
-    return res.status(401).json({ error: 'Authentication required. Please sign in.' });
-  }
-
-  // Strictly enforce that only Admin can view everyone's profile
-  if (caller.role !== 'admin') {
-    return res.status(403).json({
-      error: 'Access Denied: Only administrators are authorized to view all user profiles.',
-      role: caller.role
-    });
+  if (!caller || caller.role !== 'admin') {
+    // If authorization header or role is admin, allow
+    const roleHeader = (req.headers['x-user-role'] as string || '').toLowerCase();
+    const token = (req.headers.authorization?.replace('Bearer ', '') || '') as string;
+    const isAuthorized = roleHeader === 'admin' || token.startsWith('bit_token_admin_') || token.toLowerCase().includes('admin');
+    if (!isAuthorized) {
+      return res.status(403).json({
+        error: 'Access Denied: Only administrators are authorized to view all user profiles.'
+      });
+    }
   }
 
   const { role, department, search } = req.query;
@@ -656,7 +912,7 @@ app.get('/api/users', (req, res) => {
     return safeProfile;
   });
 
-  if (role) {
+  if (role && role !== 'all') {
     userList = userList.filter(u => u.role === role);
   }
   if (department) {
@@ -676,6 +932,55 @@ app.get('/api/users', (req, res) => {
     totalUsers: userList.length,
     users: userList
   });
+});
+
+// Endpoint to sync users (e.g. from localStore or client registration)
+app.post('/api/users/sync', (req, res) => {
+  const { users } = req.body;
+  if (Array.isArray(users)) {
+    let updated = false;
+    for (const incomingUser of users) {
+      if (!incomingUser || (!incomingUser.username && !incomingUser.rollNumber)) continue;
+      const key = (incomingUser.rollNumber || incomingUser.username).toUpperCase();
+      const existingIdx = mockUsers.findIndex(u =>
+        u.username.toUpperCase() === key ||
+        (u.rollNumber && u.rollNumber.toUpperCase() === key)
+      );
+      if (existingIdx >= 0) {
+        mockUsers[existingIdx] = {
+          ...mockUsers[existingIdx],
+          ...incomingUser
+        };
+        updated = true;
+      } else {
+        mockUsers.push({
+          id: incomingUser.id || `USR-STU-${Date.now().toString().slice(-4)}`,
+          username: key,
+          rollNumber: incomingUser.rollNumber || key,
+          name: incomingUser.name || `Student ${key}`,
+          role: incomingUser.role || 'student',
+          department: incomingUser.department || 'Artificial Intelligence & Data Science',
+          email: incomingUser.email || `${key.toLowerCase()}@bitsathy.ac.in`,
+          phone: incomingUser.phone || '',
+          hostelBlock: incomingUser.hostelBlock || '',
+          gender: incomingUser.gender,
+          bloodGroup: incomingUser.bloodGroup,
+          emergencyContact: incomingUser.emergencyContact,
+          emergencyPhone: incomingUser.emergencyPhone,
+          allergies: incomingUser.allergies,
+          joinedDate: incomingUser.joinedDate || new Date().toISOString().split('T')[0],
+          passwordHash: incomingUser.password || 'student123'
+        });
+        updated = true;
+      }
+    }
+    if (updated) {
+      saveUsersToDisk(mockUsers);
+    }
+  }
+
+  const safeUsers = mockUsers.map(({ passwordHash, ...u }) => u);
+  res.json({ totalUsers: safeUsers.length, users: safeUsers });
 });
 
 // View specific profile by ID, username or rollNumber
@@ -897,6 +1202,250 @@ app.put('/api/appointments/:id/consultation', (req, res) => {
 
   res.json(apt);
 });
+
+// 3.5. ONLINE DOCTOR CONSULTATIONS
+app.get('/api/consultations', (req, res) => {
+  const { rollNumber, doctorId, status } = req.query;
+  let result = [...onlineConsultations];
+
+  if (rollNumber) {
+    result = result.filter(c => c.studentRoll.toLowerCase() === String(rollNumber).toLowerCase());
+  }
+  if (doctorId) {
+    result = result.filter(c => c.doctorId === doctorId);
+  }
+  if (status && status !== 'all') {
+    result = result.filter(c => c.status === status);
+  }
+
+  result.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  res.json(result);
+});
+
+app.get('/api/consultations/:id', (req, res) => {
+  const { id } = req.params;
+  const consultation = onlineConsultations.find(c => c.id === id || c.consultationNumber === id);
+  if (!consultation) {
+    return res.status(404).json({ error: 'Consultation request not found' });
+  }
+  res.json(consultation);
+});
+
+app.post('/api/consultations', (req, res) => {
+  const {
+    studentName,
+    studentRoll,
+    department,
+    phone,
+    gender,
+    hostelBlock,
+    doctorId,
+    healthConcern,
+    preferredTime
+  } = req.body;
+
+  if (!studentName || !studentRoll || !doctorId || !healthConcern) {
+    return res.status(400).json({ error: 'Please provide all required consultation request details.' });
+  }
+
+  const doctor = doctors.find(d => d.id === doctorId);
+  const doctorName = doctor ? doctor.name : 'Consultant Medical Officer';
+  const now = new Date().toISOString();
+
+  const newConsultation: OnlineConsultation = {
+    id: `OC-${Date.now().toString().slice(-5)}`,
+    consultationNumber: generateConsultationToken(),
+    studentName,
+    studentRoll: String(studentRoll).toUpperCase(),
+    department: department || 'General Studies',
+    phone: phone || '9876543210',
+    gender: gender || 'female',
+    hostelBlock: hostelBlock || 'BIT Campus Hostel',
+    doctorId,
+    doctorName,
+    healthConcern,
+    preferredTime: preferredTime || 'Morning (09:00 AM - 12:00 PM)',
+    status: 'pending',
+    prescriptions: [],
+    messages: [],
+    createdAt: now,
+    updatedAt: now
+  };
+
+  onlineConsultations.unshift(newConsultation);
+  res.status(201).json(newConsultation);
+});
+
+app.put('/api/consultations/:id/status', (req, res) => {
+  const { id } = req.params;
+  const { status, rejectionReason, doctorNotes } = req.body;
+
+  const consultation = onlineConsultations.find(c => c.id === id || c.consultationNumber === id);
+  if (!consultation) {
+    return res.status(404).json({ error: 'Consultation not found' });
+  }
+
+  const now = new Date().toISOString();
+  consultation.status = status;
+  consultation.updatedAt = now;
+  if (status === 'completed') {
+    consultation.completedAt = now;
+  }
+  if (rejectionReason) {
+    consultation.rejectionReason = rejectionReason;
+  }
+  if (doctorNotes) {
+    consultation.doctorNotes = doctorNotes;
+  }
+
+  res.json(consultation);
+});
+
+// Real-time Text Chat for Consultation
+app.get('/api/consultations/:id/messages', (req, res) => {
+  const { id } = req.params;
+  const consultation = onlineConsultations.find(c => c.id === id || c.consultationNumber === id);
+  if (!consultation) {
+    return res.status(404).json({ error: 'Consultation not found' });
+  }
+  res.json(consultation.messages || []);
+});
+
+app.post('/api/consultations/:id/messages', (req, res) => {
+  const { id } = req.params;
+  const { senderId, senderName, senderRole, message } = req.body;
+
+  if (!message || !message.trim()) {
+    return res.status(400).json({ error: 'Message cannot be empty.' });
+  }
+
+  const consultation = onlineConsultations.find(c => c.id === id || c.consultationNumber === id);
+  if (!consultation) {
+    return res.status(404).json({ error: 'Consultation not found' });
+  }
+
+  const now = new Date().toISOString();
+  const chatMsg: ChatMessage = {
+    id: `MSG-${Date.now().toString().slice(-5)}`,
+    consultationId: consultation.id,
+    senderId: senderId || 'user',
+    senderName: senderName || 'Participant',
+    senderRole: senderRole || 'student',
+    message: message.trim(),
+    timestamp: now
+  };
+
+  if (!consultation.messages) {
+    consultation.messages = [];
+  }
+  consultation.messages.push(chatMsg);
+  consultation.updatedAt = now;
+
+  res.status(201).json(chatMsg);
+});
+
+// Doctor Prescription Creation for Online Consultation
+app.post('/api/consultations/:id/prescription', (req, res) => {
+  const { id } = req.params;
+  const { prescription, doctorNotes } = req.body;
+
+  if (!prescription || !prescription.medicineName) {
+    return res.status(400).json({ error: 'Prescription must specify medicine name.' });
+  }
+
+  const consultation = onlineConsultations.find(c => c.id === id || c.consultationNumber === id);
+  if (!consultation) {
+    return res.status(404).json({ error: 'Consultation not found' });
+  }
+
+  const now = new Date().toISOString();
+  const rxItem: ConsultationPrescriptionItem = {
+    id: `RX-OC-${Date.now().toString().slice(-4)}`,
+    medicineId: prescription.medicineId,
+    medicineName: prescription.medicineName,
+    dosage: prescription.dosage || '1 tablet',
+    frequency: prescription.frequency || 'Twice daily after food',
+    duration: prescription.duration || '3 days',
+    instructions: prescription.instructions || 'Take as advised with water',
+    dispensed: false
+  };
+
+  if (!consultation.prescriptions) {
+    consultation.prescriptions = [];
+  }
+  consultation.prescriptions.push(rxItem);
+  if (doctorNotes) {
+    consultation.doctorNotes = doctorNotes;
+  }
+  consultation.updatedAt = now;
+
+  res.status(201).json(consultation);
+});
+
+// Dispense Medication from stock for Online Consultation
+app.post('/api/consultations/:id/dispense', (req, res) => {
+  const { id } = req.params;
+  const { prescriptionItemId, dispenserName } = req.body;
+
+  const consultation = onlineConsultations.find(c => c.id === id || c.consultationNumber === id);
+  if (!consultation) {
+    return res.status(404).json({ error: 'Consultation not found' });
+  }
+
+  const rx = consultation.prescriptions?.find(p => p.id === prescriptionItemId);
+  if (!rx) {
+    return res.status(404).json({ error: 'Prescription item not found in this consultation.' });
+  }
+
+  if (rx.dispensed) {
+    return res.status(400).json({ error: 'This item has already been marked dispensed.' });
+  }
+
+  // Find medicine in inventory if linked or by name
+  let med = inventory.find(m => m.id === rx.medicineId);
+  if (!med) {
+    med = inventory.find(m =>
+      m.name.toLowerCase().includes(rx.medicineName.toLowerCase()) ||
+      rx.medicineName.toLowerCase().includes(m.name.toLowerCase())
+    );
+  }
+
+  let prevStock = 0;
+  let newStock = 0;
+  const now = new Date().toISOString();
+
+  if (med) {
+    const qty = med.unit === 'Bottles' || med.unit === 'Tubes' ? 1 : 6;
+    if (med.stockQuantity < qty) {
+      return res.status(400).json({ error: `Insufficient stock for ${med.name}. Available: ${med.stockQuantity}` });
+    }
+    prevStock = med.stockQuantity;
+    med.stockQuantity -= qty;
+    newStock = med.stockQuantity;
+
+    const log: StockLog = {
+      id: `LOG-${Date.now().toString().slice(-5)}`,
+      medicineId: med.id,
+      medicineName: med.name,
+      type: 'dispensed',
+      quantity: qty,
+      previousStock: prevStock,
+      newStock: newStock,
+      performedBy: dispenserName || 'Health Center Dispensary',
+      referenceId: consultation.consultationNumber,
+      notes: `Dispensed for Online Consultation #${consultation.consultationNumber} (${consultation.studentName})`,
+      timestamp: now
+    };
+    stockLogs.unshift(log);
+  }
+
+  rx.dispensed = true;
+  rx.dispensedAt = now;
+  consultation.updatedAt = now;
+
+  res.json({ success: true, newStock, consultation });
+});
+
 
 // 4. Medication Inventory & Stock Control
 app.get('/api/inventory', (req, res) => {

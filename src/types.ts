@@ -144,3 +144,52 @@ export interface TriageResult {
   advice: string;
   redFlags: string[];
 }
+
+export type ConsultationStatus = 'pending' | 'accepted' | 'in_consultation' | 'completed' | 'rejected';
+
+export interface ChatMessage {
+  id: string;
+  consultationId: string;
+  senderId: string;
+  senderName: string;
+  senderRole: 'student' | 'doctor';
+  message: string;
+  timestamp: string;
+}
+
+export interface ConsultationPrescriptionItem {
+  id: string;
+  medicineId?: string;
+  medicineName: string;
+  dosage: string;
+  frequency: string;
+  duration: string;
+  instructions: string;
+  quantity?: number;
+  dispensed?: boolean;
+  dispensedAt?: string;
+}
+
+export interface OnlineConsultation {
+  id: string;
+  consultationNumber: string; // e.g. "BIT-OC-101"
+  studentId?: string;
+  studentRoll: string;
+  studentName: string;
+  department: string;
+  phone: string;
+  gender?: 'male' | 'female' | 'other';
+  hostelBlock?: string;
+  doctorId: string;
+  doctorName: string;
+  healthConcern: string;
+  preferredTime?: string;
+  status: ConsultationStatus;
+  doctorNotes?: string;
+  prescriptions?: ConsultationPrescriptionItem[];
+  messages?: ChatMessage[];
+  createdAt: string;
+  updatedAt: string;
+  completedAt?: string;
+  rejectionReason?: string;
+}

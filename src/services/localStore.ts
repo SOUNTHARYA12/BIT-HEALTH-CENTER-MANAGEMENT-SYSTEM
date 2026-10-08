@@ -7,7 +7,11 @@ import {
   TriageResult,
   User,
   LoginCredentials,
-  StudentRegisterData
+  StudentRegisterData,
+  OnlineConsultation,
+  ConsultationStatus,
+  ChatMessage,
+  ConsultationPrescriptionItem
 } from '../types';
 
 interface StoredUserRecord extends User {
@@ -710,4 +714,359 @@ export function evaluateLocalTriage(payload: { symptoms: string; age?: number; g
       : 'Token issued. Please wait at the outpatient waiting hall when your number is called.',
     redFlags
   };
+}
+
+// 5. Online Doctor Consultations Store
+const DEFAULT_CONSULTATIONS: OnlineConsultation[] = [
+  {
+    id: 'OC-1001',
+    consultationNumber: 'BIT-OC-101',
+    studentRoll: '7376231AD101',
+    studentName: 'Kavitha M.',
+    department: 'Artificial Intelligence & Data Science',
+    phone: '9876543210',
+    gender: 'female',
+    hostelBlock: 'Thamarai Hostel - Block A',
+    doctorId: 'DOC-101',
+    doctorName: 'Dr. R. Sathishkumar',
+    healthConcern: 'Persistent mild dry cough and slight fatigue for the past 2 days after lab work.',
+    preferredTime: 'Morning (09:00 AM - 12:00 PM)',
+    status: 'in_consultation',
+    doctorNotes: 'Patient reports mild upper respiratory irritation. No fever currently.',
+    prescriptions: [
+      {
+        id: 'RX-OC-01',
+        medicineId: 'MED-104',
+        medicineName: 'Cough Syrup (Ascoril D+)',
+        dosage: '10ml',
+        frequency: 'Thrice daily after food',
+        duration: '4 days',
+        instructions: 'Take with warm water before sleep. Avoid chilled beverages.',
+        dispensed: false
+      }
+    ],
+    messages: [
+      {
+        id: 'MSG-01',
+        consultationId: 'OC-1001',
+        senderId: '7376231AD101',
+        senderName: 'Kavitha M.',
+        senderRole: 'student',
+        message: 'Hello Doctor, I have had a dry cough for 2 days. It gets a bit worse in air-conditioned labs.',
+        timestamp: new Date(Date.now() - 3600000 * 2).toISOString()
+      },
+      {
+        id: 'MSG-02',
+        consultationId: 'OC-1001',
+        senderId: 'DOC-101',
+        senderName: 'Dr. R. Sathishkumar',
+        senderRole: 'doctor',
+        message: 'Hello Kavitha. Do you have any difficulty in breathing, fever, or sore throat?',
+        timestamp: new Date(Date.now() - 3600000 * 1.5).toISOString()
+      },
+      {
+        id: 'MSG-03',
+        consultationId: 'OC-1001',
+        senderId: '7376231AD101',
+        senderName: 'Kavitha M.',
+        senderRole: 'student',
+        message: 'No breathing difficulty or fever, just throat tickle and dry cough.',
+        timestamp: new Date(Date.now() - 3600000).toISOString()
+      },
+      {
+        id: 'MSG-04',
+        consultationId: 'OC-1001',
+        senderId: 'DOC-101',
+        senderName: 'Dr. R. Sathishkumar',
+        senderRole: 'doctor',
+        message: 'Got it. I am adding a prescription for cough syrup. Stay hydrated with warm water.',
+        timestamp: new Date(Date.now() - 1800000).toISOString()
+      }
+    ],
+    createdAt: new Date(Date.now() - 3600000 * 3).toISOString(),
+    updatedAt: new Date(Date.now() - 1800000).toISOString()
+  },
+  {
+    id: 'OC-1002',
+    consultationNumber: 'BIT-OC-102',
+    studentRoll: '7376221CS214',
+    studentName: 'Siddharth R.',
+    department: 'Computer Science & Engineering',
+    phone: '9845123789',
+    gender: 'male',
+    hostelBlock: 'Valavan Hostel - Block B',
+    doctorId: 'DOC-102',
+    doctorName: 'Dr. P. Deepa',
+    healthConcern: 'Mild skin redness and itching around forearm after playing badminton.',
+    preferredTime: 'Afternoon (02:00 PM - 05:00 PM)',
+    status: 'completed',
+    doctorNotes: 'Contact dermatitis / sweat rash. Advised washing with mild soap and applying calamine lotion.',
+    prescriptions: [
+      {
+        id: 'RX-OC-02',
+        medicineId: 'MED-103',
+        medicineName: 'Cetirizine 10mg (Okacet)',
+        dosage: '1 tablet (10mg)',
+        frequency: 'Once daily at night',
+        duration: '3 days',
+        instructions: 'Take after dinner. May cause mild drowsiness.',
+        dispensed: true,
+        dispensedAt: new Date(Date.now() - 3600000 * 12).toISOString()
+      }
+    ],
+    messages: [
+      {
+        id: 'MSG-05',
+        consultationId: 'OC-1002',
+        senderId: '7376221CS214',
+        senderName: 'Siddharth R.',
+        senderRole: 'student',
+        message: 'Good morning Dr. Deepa, I developed a mild itchy rash on my arm after sports yesterday.',
+        timestamp: new Date(Date.now() - 3600000 * 24).toISOString()
+      },
+      {
+        id: 'MSG-06',
+        consultationId: 'OC-1002',
+        senderId: 'DOC-102',
+        senderName: 'Dr. P. Deepa',
+        senderRole: 'doctor',
+        message: 'Hello Siddharth. It looks like mild sweat-induced irritation. I prescribed Cetirizine. Collect it from the campus dispensary.',
+        timestamp: new Date(Date.now() - 3600000 * 23).toISOString()
+      }
+    ],
+    createdAt: new Date(Date.now() - 3600000 * 25).toISOString(),
+    updatedAt: new Date(Date.now() - 3600000 * 12).toISOString(),
+    completedAt: new Date(Date.now() - 3600000 * 12).toISOString()
+  },
+  {
+    id: 'OC-1003',
+    consultationNumber: 'BIT-OC-103',
+    studentRoll: '7376231AD101',
+    studentName: 'Kavitha M.',
+    department: 'Artificial Intelligence & Data Science',
+    phone: '9876543210',
+    gender: 'female',
+    hostelBlock: 'Thamarai Hostel - Block A',
+    doctorId: 'DOC-104',
+    doctorName: 'Dr. M. Anitha',
+    healthConcern: 'Exam stress and trouble sleeping before upcoming semester project reviews.',
+    preferredTime: 'Evening (05:00 PM - 08:00 PM)',
+    status: 'pending',
+    messages: [],
+    createdAt: new Date(Date.now() - 3600000 * 1).toISOString(),
+    updatedAt: new Date(Date.now() - 3600000 * 1).toISOString()
+  }
+];
+
+export function getLocalConsultations(params?: {
+  rollNumber?: string;
+  doctorId?: string;
+  status?: string;
+}): OnlineConsultation[] {
+  let list = getStorage<OnlineConsultation[]>('bit_hc_consultations', DEFAULT_CONSULTATIONS);
+  if (params?.rollNumber) {
+    list = list.filter(c => c.studentRoll.toUpperCase() === params.rollNumber?.toUpperCase());
+  }
+  if (params?.doctorId) {
+    list = list.filter(c => c.doctorId === params.doctorId);
+  }
+  if (params?.status && params.status !== 'all') {
+    list = list.filter(c => c.status === params.status);
+  }
+  return list;
+}
+
+export function getLocalConsultationById(id: string): OnlineConsultation | null {
+  const list = getLocalConsultations();
+  const found = list.find(c => c.id === id || c.consultationNumber === id);
+  return found || null;
+}
+
+let localConsultationCounter = 104;
+export function addLocalConsultation(data: Partial<OnlineConsultation>): OnlineConsultation {
+  const list = getLocalConsultations();
+  const num = String(localConsultationCounter++).padStart(3, '0');
+  const consultationNumber = `BIT-OC-${num}`;
+  const now = new Date().toISOString();
+
+  const newConsultation: OnlineConsultation = {
+    id: `OC-${Date.now().toString().slice(-4)}`,
+    consultationNumber,
+    studentRoll: (data.studentRoll || '7376231AD101').toUpperCase(),
+    studentName: data.studentName || 'Student Patient',
+    department: data.department || 'General Engineering',
+    phone: data.phone || '9876543210',
+    gender: data.gender || 'female',
+    hostelBlock: data.hostelBlock || 'Hostel Block',
+    doctorId: data.doctorId || 'DOC-101',
+    doctorName: data.doctorName || 'Dr. R. Sathishkumar',
+    healthConcern: data.healthConcern || 'Health concern consultation request',
+    preferredTime: data.preferredTime || 'Morning (09:00 AM - 12:00 PM)',
+    status: 'pending',
+    prescriptions: [],
+    messages: [],
+    createdAt: now,
+    updatedAt: now
+  };
+
+  list.unshift(newConsultation);
+  setStorage('bit_hc_consultations', list);
+  return newConsultation;
+}
+
+export function updateLocalConsultationStatus(
+  id: string,
+  status: ConsultationStatus,
+  extra?: { rejectionReason?: string; doctorNotes?: string }
+): OnlineConsultation {
+  const list = getLocalConsultations();
+  const idx = list.findIndex(c => c.id === id || c.consultationNumber === id);
+  if (idx < 0) throw new Error('Consultation request not found');
+
+  const now = new Date().toISOString();
+  list[idx] = {
+    ...list[idx],
+    status,
+    updatedAt: now,
+    ...(status === 'completed' ? { completedAt: now } : {}),
+    ...(extra?.rejectionReason ? { rejectionReason: extra.rejectionReason } : {}),
+    ...(extra?.doctorNotes ? { doctorNotes: extra.doctorNotes } : {})
+  };
+
+  setStorage('bit_hc_consultations', list);
+  return list[idx];
+}
+
+export function addLocalChatMessage(
+  consultationId: string,
+  msg: { senderId: string; senderName: string; senderRole: 'student' | 'doctor'; message: string }
+): ChatMessage {
+  const list = getLocalConsultations();
+  const idx = list.findIndex(c => c.id === consultationId || c.consultationNumber === consultationId);
+  if (idx < 0) throw new Error('Consultation not found');
+
+  const now = new Date().toISOString();
+  const newMsg: ChatMessage = {
+    id: `MSG-${Date.now().toString().slice(-5)}`,
+    consultationId: list[idx].id,
+    senderId: msg.senderId,
+    senderName: msg.senderName,
+    senderRole: msg.senderRole,
+    message: msg.message,
+    timestamp: now
+  };
+
+  if (!list[idx].messages) {
+    list[idx].messages = [];
+  }
+  list[idx].messages!.push(newMsg);
+  list[idx].updatedAt = now;
+
+  setStorage('bit_hc_consultations', list);
+  return newMsg;
+}
+
+export function addLocalConsultationPrescription(
+  consultationId: string,
+  item: Omit<ConsultationPrescriptionItem, 'id'>,
+  doctorNotes?: string
+): OnlineConsultation {
+  const list = getLocalConsultations();
+  const idx = list.findIndex(c => c.id === consultationId || c.consultationNumber === consultationId);
+  if (idx < 0) throw new Error('Consultation not found');
+
+  const now = new Date().toISOString();
+  const rxItem: ConsultationPrescriptionItem = {
+    ...item,
+    id: `RX-OC-${Date.now().toString().slice(-4)}`,
+    dispensed: false
+  };
+
+  if (!list[idx].prescriptions) {
+    list[idx].prescriptions = [];
+  }
+  list[idx].prescriptions!.push(rxItem);
+  if (doctorNotes) {
+    list[idx].doctorNotes = doctorNotes;
+  }
+  list[idx].updatedAt = now;
+
+  setStorage('bit_hc_consultations', list);
+  return list[idx];
+}
+
+export function dispenseLocalConsultationMedicine(
+  consultationId: string,
+  prescriptionItemId: string,
+  dispenserName?: string
+): { success: boolean; newStock: number; log: StockLog } {
+  const consultations = getLocalConsultations();
+  const cIdx = consultations.findIndex(c => c.id === consultationId || c.consultationNumber === consultationId);
+  if (cIdx < 0) throw new Error('Consultation not found');
+
+  const consultation = consultations[cIdx];
+  const rxItem = consultation.prescriptions?.find(p => p.id === prescriptionItemId);
+  if (!rxItem) throw new Error('Prescription item not found in consultation');
+
+  if (rxItem.dispensed) {
+    throw new Error('This prescription medicine has already been dispensed.');
+  }
+
+  // Deduct from inventory if matching medicine found
+  const inventory = getLocalInventory();
+  let matchedMed: Medicine | undefined;
+  if (rxItem.medicineId) {
+    matchedMed = inventory.find(m => m.id === rxItem.medicineId);
+  }
+  if (!matchedMed) {
+    matchedMed = inventory.find(m =>
+      m.name.toLowerCase().includes(rxItem.medicineName.toLowerCase()) ||
+      rxItem.medicineName.toLowerCase().includes(m.name.toLowerCase())
+    );
+  }
+
+  let newStock = 0;
+  let prevStock = 0;
+  const now = new Date().toISOString();
+
+  if (matchedMed) {
+    // Quantity defaults to 1 or parses numbers from dosage
+    let qty = 6;
+    if (matchedMed.unit === 'Bottles' || matchedMed.unit === 'Tubes') {
+      qty = 1;
+    }
+    if (matchedMed.stockQuantity < qty) {
+      throw new Error(`Insufficient stock for ${matchedMed.name}. Available: ${matchedMed.stockQuantity}`);
+    }
+    prevStock = matchedMed.stockQuantity;
+    matchedMed.stockQuantity -= qty;
+    newStock = matchedMed.stockQuantity;
+    setStorage('bit_hc_inventory', inventory);
+  }
+
+  // Mark prescription as dispensed
+  rxItem.dispensed = true;
+  rxItem.dispensedAt = now;
+  consultation.updatedAt = now;
+  setStorage('bit_hc_consultations', consultations);
+
+  // Add stock audit log
+  const logs = getStorage<StockLog[]>('bit_hc_logs', DEFAULT_LOGS);
+  const log: StockLog = {
+    id: `LOG-${Date.now().toString().slice(-4)}`,
+    medicineId: matchedMed?.id || 'MED-OTC',
+    medicineName: rxItem.medicineName,
+    type: 'dispensed',
+    quantity: matchedMed?.unit === 'Bottles' || matchedMed?.unit === 'Tubes' ? 1 : 6,
+    previousStock: prevStock,
+    newStock: newStock,
+    performedBy: dispenserName || 'Health Center Dispensary',
+    referenceId: consultation.consultationNumber,
+    notes: `Dispensed for Online Consultation #${consultation.consultationNumber} (${consultation.studentName})`,
+    timestamp: now
+  };
+  logs.unshift(log);
+  setStorage('bit_hc_logs', logs);
+
+  return { success: true, newStock, log };
 }

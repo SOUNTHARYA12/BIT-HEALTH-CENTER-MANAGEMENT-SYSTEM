@@ -717,64 +717,61 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
           </div>
 
           {/* Right Column: Campus & Portal Features Showcase */}
-          <div className="lg:col-span-5 space-y-6">
-            
+          <div className="lg:col-span-5 space-y-5">
             {/* Campus Info Card */}
-            <div className="bg-white border border-slate-200/80 rounded-2xl p-6 shadow-sm relative overflow-hidden">
-              <div className="absolute top-0 right-0 transform translate-x-4 -translate-y-4 w-32 h-32 bg-teal-50 rounded-full blur-2xl pointer-events-none"></div>
-              
+            <div className="bg-white border border-slate-200/80 rounded-2xl p-5 shadow-sm relative overflow-hidden">
               <div className="flex items-center space-x-2 text-teal-700 text-xs font-semibold uppercase tracking-wider mb-2">
                 <Building2 className="w-4 h-4" />
                 <span>Bannari Amman Institute of Technology</span>
               </div>
               
-              <h3 className="text-xl font-bold text-slate-900 mb-2">
-                Integrated Campus Healthcare Portal
+              <h3 className="text-base font-bold text-slate-900 mb-1.5">
+                Campus Health & Wellness Center
               </h3>
-              <p className="text-xs text-slate-600 leading-relaxed mb-6">
-                Streamlining outpatient appointments, emergency triage, doctor consultation notes, and pharmacy stock replenishment across all student hostels and campus faculties.
+              <p className="text-xs text-slate-600 leading-relaxed mb-4">
+                Full-service healthcare system serving students, faculty, and resident scholars across all hostel blocks and academic clusters.
               </p>
 
-              <div className="space-y-3">
-                <div className="flex items-start space-x-3 text-xs text-slate-600">
+              <div className="space-y-2.5">
+                <div className="flex items-start space-x-2.5 text-xs text-slate-600">
                   <CheckCircle2 className="w-4 h-4 text-teal-600 shrink-0 mt-0.5" />
                   <div>
-                    <span className="font-semibold text-slate-900">Student Register Number Auth:</span> Register & log in directly using your official BIT student register number.
+                    <span className="font-semibold text-slate-900">Student Register Number Auth:</span> Register & log in directly using your official BIT roll number.
                   </div>
                 </div>
 
-                <div className="flex items-start space-x-3 text-xs text-slate-600">
+                <div className="flex items-start space-x-2.5 text-xs text-slate-600">
                   <CheckCircle2 className="w-4 h-4 text-teal-600 shrink-0 mt-0.5" />
                   <div>
-                    <span className="font-semibold text-slate-900">Instant Appointment Token:</span> Digital token booking with real-time OPD queue status.
+                    <span className="font-semibold text-slate-900">Instant OPD Tokens:</span> Live appointment scheduling with real-time queue tracker.
                   </div>
                 </div>
 
-                <div className="flex items-start space-x-3 text-xs text-slate-600">
+                <div className="flex items-start space-x-2.5 text-xs text-slate-600">
                   <CheckCircle2 className="w-4 h-4 text-teal-600 shrink-0 mt-0.5" />
                   <div>
-                    <span className="font-semibold text-slate-900">AI Symptom Triage Assistant:</span> Smart preliminary health analysis powered by Gemini AI.
+                    <span className="font-semibold text-slate-900">Online Consultation & Tele-Health:</span> Direct private chat with campus physicians.
                   </div>
                 </div>
 
-                <div className="flex items-start space-x-3 text-xs text-slate-600">
+                <div className="flex items-start space-x-2.5 text-xs text-slate-600">
                   <CheckCircle2 className="w-4 h-4 text-teal-600 shrink-0 mt-0.5" />
                   <div>
-                    <span className="font-semibold text-slate-900">Paperless Prescriptions:</span> Seamless doctor-to-pharmacy prescription dispensing.
+                    <span className="font-semibold text-slate-900">Pharmacy Medication Tracking:</span> Automated dispensary logs with barcode and batch control.
                   </div>
                 </div>
               </div>
             </div>
 
             {/* Health Center Emergency Callout */}
-            <div className="bg-rose-50 border border-rose-200 rounded-2xl p-5 flex items-center space-x-4">
-              <div className="w-10 h-10 rounded-xl bg-rose-100 flex items-center justify-center text-rose-600 shrink-0">
-                <ShieldAlert className="w-5 h-5 animate-pulse" />
+            <div className="bg-rose-50 border border-rose-200 rounded-2xl p-4 flex items-center space-x-3.5">
+              <div className="w-9 h-9 rounded-xl bg-rose-100 flex items-center justify-center text-rose-600 shrink-0">
+                <ShieldAlert className="w-4 h-4 animate-pulse" />
               </div>
               <div>
-                <h4 className="text-sm font-bold text-rose-900">24/7 Campus Emergency Casualty</h4>
-                <p className="text-xs text-rose-700">
-                  For immediate acute care or ambulance requests, call Ext <strong className="text-rose-900">108</strong> or <strong className="text-rose-900">04295 226000</strong>.
+                <h4 className="text-xs font-bold text-rose-950">24/7 Campus Emergency Casualty</h4>
+                <p className="text-[11px] text-rose-800">
+                  Immediate acute assistance or campus ambulance: Ext <strong className="text-rose-950">108</strong> or <strong className="text-rose-950">+91 4295 226000</strong>.
                 </p>
               </div>
             </div>

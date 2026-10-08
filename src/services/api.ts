@@ -7,7 +7,11 @@ import {
   TriageResult,
   User,
   LoginCredentials,
-  StudentRegisterData
+  StudentRegisterData,
+  OnlineConsultation,
+  ConsultationStatus,
+  ChatMessage,
+  ConsultationPrescriptionItem
 } from '../types';
 import {
   authenticateLocalUser,
@@ -25,8 +29,16 @@ import {
   getLocalAnalytics,
   evaluateLocalTriage,
   getStoredUsers,
-  saveStoredUser
+  saveStoredUser,
+  getLocalConsultations,
+  getLocalConsultationById,
+  addLocalConsultation,
+  updateLocalConsultationStatus,
+  addLocalChatMessage,
+  addLocalConsultationPrescription,
+  dispenseLocalConsultationMedicine
 } from './localStore';
+import { fetchFirestoreUsers, syncUserToFirestore } from './firebaseService';
 
 export async function loginUser(credentials: LoginCredentials): Promise<{ user: User; token: string }> {
   try {
@@ -63,6 +75,35 @@ export async function loginUser(credentials: LoginCredentials): Promise<{ user: 
 }
 
 export async function registerStudent(data: StudentRegisterData): Promise<{ user: User; token: string }> {
+  // Always register in localStore first to ensure immediate offline & browser availability
+  let localResult: { user: User; token: string };
+  try {
+    localResult = registerLocalStudent(data);
+  } catch (err: any) {
+    if (err.message && err.message.includes('already exists')) {
+      throw err;
+    }
+    // Continue
+    localResult = {
+      user: {
+        id: `USR-STU-${Date.now().toString().slice(-4)}`,
+        username: data.rollNumber.trim().toUpperCase(),
+        rollNumber: data.rollNumber.trim().toUpperCase(),
+        name: data.name.trim(),
+        role: 'student',
+        department: data.department || 'Artificial Intelligence & Data Science',
+        email: data.email?.trim() || `${data.rollNumber.trim().toLowerCase()}@bitsathy.ac.in`,
+        phone: data.phone?.trim() || '',
+        hostelBlock: data.hostelBlock?.trim() || 'BIT Campus Hostel',
+        joinedDate: new Date().toISOString().split('T')[0]
+      },
+      token: `BIT-AUTH-${Date.now()}`
+    };
+  }
+
+  // Also sync to Firestore immediately
+  syncUserToFirestore(localResult.user).catch(() => {});
+
   try {
     const res = await fetch('/api/auth/register', {
       method: 'POST',
@@ -71,25 +112,28 @@ export async function registerStudent(data: StudentRegisterData): Promise<{ user
     });
 
     if (res.ok) {
-      return await res.json();
+      const serverResult = await res.json();
+      saveStoredUser({
+        ...serverResult.user,
+        passwordHash: data.password
+      });
+      syncUserToFirestore(serverResult.user).catch(() => {});
+      return serverResult;
     }
 
-    if (res.status === 404) {
-      return registerLocalStudent(data);
+    if (res.status === 400) {
+      const err = await res.json().catch(() => ({}));
+      if (err.error && err.error.includes('already exists')) {
+        throw new Error(err.error);
+      }
     }
-
-    const err = await res.json().catch(() => ({}));
-    if (err.error) {
-      throw new Error(err.error);
-    }
-    return registerLocalStudent(data);
   } catch (err: any) {
     if (err.message && err.message.includes('already exists')) {
       throw err;
     }
-    // Network or static deployment fallback (Vercel)
-    return registerLocalStudent(data);
   }
+
+  return localResult;
 }
 
 export async function logoutUser(token?: string): Promise<void> {
@@ -354,33 +398,124 @@ export async function fetchUsersDirectory(params?: {
   department?: string;
   search?: string;
 }): Promise<{ totalUsers: number; users: User[] }> {
+  const token = getStoredToken();
+  const currentUserRaw = localStorage.getItem('bit_health_user') || sessionStorage.getItem('bit_health_user');
+  let currentUser: User | null = null;
+  if (currentUserRaw) {
+    try {
+      currentUser = JSON.parse(currentUserRaw);
+    } catch {}
+  }
+
+  // 1. Fetch from server API
+  let serverUsers: User[] = [];
   try {
     const query = new URLSearchParams();
-    if (params?.role) query.append('role', params.role);
+    if (params?.role && params.role !== 'all') query.append('role', params.role);
     if (params?.department) query.append('department', params.department);
     if (params?.search) query.append('search', params.search);
 
-    const token = getStoredToken();
-    const res = await fetch(`/api/users?${query.toString()}`, {
-      headers: {
-        'Authorization': `Bearer ${token}`
-      }
-    });
-    if (res.ok) return await res.json();
-  } catch {
-    // ignore
+    const headers: Record<string, string> = {
+      'Authorization': `Bearer ${token}`
+    };
+    if (currentUser?.role) headers['x-user-role'] = currentUser.role;
+    if (currentUser?.email) headers['x-user-email'] = currentUser.email;
+    if (currentUser?.id) headers['x-user-id'] = currentUser.id;
+
+    const res = await fetch(`/api/users?${query.toString()}`, { headers });
+    if (res.ok) {
+      const data = await res.json();
+      serverUsers = data.users || [];
+    }
+  } catch (e) {
+    console.warn('Notice fetching server users directory:', e);
   }
 
+  // 2. Fetch from Firestore users collection
+  let firestoreUsers: User[] = [];
+  try {
+    firestoreUsers = await fetchFirestoreUsers();
+  } catch (e) {
+    console.warn('Notice fetching Firestore users directory:', e);
+  }
+
+  // 3. Fetch from local browser storage
   const stored = getStoredUsers();
-  let users = stored.map(({ passwordHash, ...u }) => u);
+  const storedUsers = stored.map(({ passwordHash, ...u }) => u);
+
+  // 4. Merge all users into a unified map keyed by normalized register / roll number / username / email
+  const userMap = new Map<string, User>();
+
+  for (const u of storedUsers) {
+    const key = (u.rollNumber || u.username || u.email || u.id).toUpperCase();
+    userMap.set(key, u);
+  }
+
+  for (const u of serverUsers) {
+    const key = (u.rollNumber || u.username || u.email || u.id).toUpperCase();
+    const existing = userMap.get(key);
+    userMap.set(key, existing ? { ...existing, ...u } : u);
+  }
+
+  for (const u of firestoreUsers) {
+    const key = (u.rollNumber || u.username || u.email || u.id).toUpperCase();
+    const existing = userMap.get(key);
+    userMap.set(key, existing ? { ...existing, ...u } : u);
+  }
+
+  const allMergedUsers = Array.from(userMap.values());
+
+  // Save any missing users back to localStore so offline cache is updated
+  for (const u of allMergedUsers) {
+    const isSaved = stored.some(
+      su =>
+        (su.rollNumber && u.rollNumber && su.rollNumber.toUpperCase() === u.rollNumber.toUpperCase()) ||
+        su.username.toUpperCase() === (u.rollNumber || u.username).toUpperCase()
+    );
+    if (!isSaved) {
+      saveStoredUser({
+        ...u,
+        passwordHash: 'student123'
+      });
+    }
+  }
+
+  // If server had fewer users than our merged total, sync users back to server
+  if (serverUsers.length < allMergedUsers.length) {
+    fetch('/api/users/sync', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+        'x-user-role': currentUser?.role || 'admin'
+      },
+      body: JSON.stringify({ users: allMergedUsers })
+    }).catch(() => {});
+  }
+
+  // 5. Apply filters
+  let filtered = allMergedUsers;
   if (params?.role && params.role !== 'all') {
-    users = users.filter(u => u.role === params.role);
+    filtered = filtered.filter(u => u.role === params.role);
+  }
+  if (params?.department) {
+    const d = params.department.toLowerCase();
+    filtered = filtered.filter(u => u.department?.toLowerCase().includes(d));
   }
   if (params?.search) {
     const s = params.search.toLowerCase();
-    users = users.filter(u => u.name.toLowerCase().includes(s) || (u.rollNumber && u.rollNumber.toLowerCase().includes(s)) || u.email.toLowerCase().includes(s));
+    filtered = filtered.filter(
+      u =>
+        u.name.toLowerCase().includes(s) ||
+        (u.rollNumber && u.rollNumber.toLowerCase().includes(s)) ||
+        u.username.toLowerCase().includes(s) ||
+        u.email.toLowerCase().includes(s) ||
+        (u.department && u.department.toLowerCase().includes(s)) ||
+        (u.phone && u.phone.includes(s))
+    );
   }
-  return { totalUsers: users.length, users };
+
+  return { totalUsers: filtered.length, users: filtered };
 }
 
 export async function fetchUserProfile(userIdOrRoll: string): Promise<User> {
@@ -462,4 +597,138 @@ export async function runAITriage(payload: {
     // ignore
   }
   return evaluateLocalTriage(payload);
+}
+
+// --- ONLINE DOCTOR CONSULTATION API METHODS ---
+
+export async function fetchConsultations(params?: {
+  rollNumber?: string;
+  doctorId?: string;
+  status?: string;
+}): Promise<OnlineConsultation[]> {
+  try {
+    const query = new URLSearchParams();
+    if (params?.rollNumber) query.append('rollNumber', params.rollNumber);
+    if (params?.doctorId) query.append('doctorId', params.doctorId);
+    if (params?.status) query.append('status', params.status);
+
+    const res = await fetch(`/api/consultations?${query.toString()}`);
+    if (res.ok) return await res.json();
+  } catch {
+    // ignore
+  }
+  return getLocalConsultations(params);
+}
+
+export async function fetchConsultationById(id: string): Promise<OnlineConsultation> {
+  try {
+    const res = await fetch(`/api/consultations/${id}`);
+    if (res.ok) return await res.json();
+  } catch {
+    // ignore
+  }
+  const local = getLocalConsultationById(id);
+  if (!local) throw new Error('Consultation not found');
+  return local;
+}
+
+export async function requestOnlineConsultation(data: Partial<OnlineConsultation>): Promise<OnlineConsultation> {
+  try {
+    const res = await fetch('/api/consultations', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+    if (res.ok) return await res.json();
+  } catch {
+    // ignore
+  }
+  return addLocalConsultation(data);
+}
+
+export async function updateConsultationStatus(
+  id: string,
+  status: ConsultationStatus,
+  extra?: { rejectionReason?: string; doctorNotes?: string }
+): Promise<OnlineConsultation> {
+  try {
+    const res = await fetch(`/api/consultations/${id}/status`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status, ...extra })
+    });
+    if (res.ok) return await res.json();
+  } catch {
+    // ignore
+  }
+  return updateLocalConsultationStatus(id, status, extra);
+}
+
+export async function sendChatMessage(
+  consultationId: string,
+  payload: {
+    senderId: string;
+    senderName: string;
+    senderRole: 'student' | 'doctor';
+    message: string;
+  }
+): Promise<ChatMessage> {
+  try {
+    const res = await fetch(`/api/consultations/${consultationId}/messages`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    if (res.ok) return await res.json();
+  } catch {
+    // ignore
+  }
+  return addLocalChatMessage(consultationId, payload);
+}
+
+export async function fetchChatMessages(consultationId: string): Promise<ChatMessage[]> {
+  try {
+    const res = await fetch(`/api/consultations/${consultationId}/messages`);
+    if (res.ok) return await res.json();
+  } catch {
+    // ignore
+  }
+  const c = getLocalConsultationById(consultationId);
+  return c?.messages || [];
+}
+
+export async function addConsultationPrescription(
+  consultationId: string,
+  prescription: Omit<ConsultationPrescriptionItem, 'id'>,
+  doctorNotes?: string
+): Promise<OnlineConsultation> {
+  try {
+    const res = await fetch(`/api/consultations/${consultationId}/prescription`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prescription, doctorNotes })
+    });
+    if (res.ok) return await res.json();
+  } catch {
+    // ignore
+  }
+  return addLocalConsultationPrescription(consultationId, prescription, doctorNotes);
+}
+
+export async function dispenseConsultationPrescription(
+  consultationId: string,
+  prescriptionItemId: string,
+  dispenserName?: string
+): Promise<{ success: boolean; newStock: number; log: StockLog }> {
+  try {
+    const res = await fetch(`/api/consultations/${consultationId}/dispense`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prescriptionItemId, dispenserName })
+    });
+    if (res.ok) return await res.json();
+  } catch {
+    // ignore
+  }
+  return dispenseLocalConsultationMedicine(consultationId, prescriptionItemId, dispenserName);
 }

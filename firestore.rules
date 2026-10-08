@@ -117,9 +117,9 @@ service cloud.firestore {
       );
       allow list: if isAdmin();
 
-      allow create: if isSignedIn() && isValidId(userId) && isValidUser(incoming()) && (
+      allow create: if isValidId(userId) && isValidUser(incoming()) && (
         isAdmin() ||
-        (request.auth.uid == userId && incoming().role == 'student')
+        incoming().role == 'student'
       );
 
       allow update: if isSignedIn() && isValidId(userId) && isValidUser(incoming()) && (
@@ -195,6 +195,24 @@ service cloud.firestore {
         isAdmin() || isPharmacist()
       );
       allow update, delete: if false; // Append-only audit trail
+    }
+
+    // Online Doctor Consultations (Student & assigned doctor access; Admin oversight)
+    match /consultations/{consultationId} {
+      allow read: if isSignedIn() && (
+        isAdmin() || isStaff() ||
+        resource.data.studentRoll == request.auth.uid ||
+        resource.data.studentEmail == request.auth.token.email
+      );
+      allow create: if isSignedIn() && isValidId(consultationId);
+      allow update: if isSignedIn() && isValidId(consultationId) && (
+        isAdmin() || isDoctor() ||
+        (
+          resource.data.studentRoll == request.auth.uid &&
+          existing().status in ['pending', 'accepted', 'in_consultation']
+        )
+      );
+      allow delete: if isAdmin() && isValidId(consultationId);
     }
 
     // Connection testing

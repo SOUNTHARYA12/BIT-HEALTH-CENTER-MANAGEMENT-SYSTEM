@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Medicine, StockLog, Appointment } from '../types';
+import { Medicine, StockLog, Appointment, OnlineConsultation } from '../types';
 import {
   fetchInventory,
   addMedicineStock,
@@ -7,7 +7,9 @@ import {
   dispenseMedicine,
   fetchStockAlerts,
   fetchStockLogs,
-  fetchAppointments
+  fetchAppointments,
+  fetchConsultations,
+  dispenseConsultationPrescription
 } from '../services/api';
 import {
   Pill,
@@ -34,6 +36,7 @@ export const PharmacyPortal: React.FC = () => {
   const [inventory, setInventory] = useState<Medicine[]>([]);
   const [stockLogs, setStockLogs] = useState<StockLog[]>([]);
   const [pendingAppointments, setPendingAppointments] = useState<Appointment[]>([]);
+  const [pendingOnlineConsultations, setPendingOnlineConsultations] = useState<OnlineConsultation[]>([]);
 
   // Search & Filter
   const [searchQuery, setSearchQuery] = useState('');
@@ -64,9 +67,10 @@ export const PharmacyPortal: React.FC = () => {
     Promise.all([
       fetchInventory({ alertOnly: alertFilterOnly }),
       fetchStockLogs(),
-      fetchAppointments({ status: 'completed' })
+      fetchAppointments({ status: 'completed' }),
+      fetchConsultations()
     ])
-      .then(([meds, logs, apts]) => {
+      .then(([meds, logs, apts, consults]) => {
         setInventory(meds);
         setStockLogs(logs);
 
@@ -75,6 +79,13 @@ export const PharmacyPortal: React.FC = () => {
           a.prescriptions && a.prescriptions.some(p => !p.dispensed)
         );
         setPendingAppointments(pending);
+
+        // Filter online consultations that have undispensed prescriptions
+        const pendingOnline = consults.filter(c =>
+          c.prescriptions && c.prescriptions.some(p => !p.dispensed)
+        );
+        setPendingOnlineConsultations(pendingOnline);
+
         setIsLoading(false);
       })
       .catch(err => {
@@ -143,6 +154,16 @@ export const PharmacyPortal: React.FC = () => {
         dispenserName: 'BIT Health Center Pharmacist'
       });
       setStatusMessage('Prescription item dispensed successfully!');
+      loadData();
+    } catch (err: any) {
+      alert(err.message || 'Dispensing failed');
+    }
+  };
+
+  const handleDispenseConsultationItem = async (consultationId: string, prescriptionItemId: string) => {
+    try {
+      await dispenseConsultationPrescription(consultationId, prescriptionItemId, 'BIT Health Center Pharmacist');
+      setStatusMessage('Online consultation prescription dispensed & deducted from medication stock!');
       loadData();
     } catch (err: any) {
       alert(err.message || 'Dispensing failed');
@@ -421,78 +442,171 @@ export const PharmacyPortal: React.FC = () => {
 
       {/* TAB 2: PENDING PRESCRIPTIONS */}
       {activeTab === 'pending_prescriptions' && (
-        <div className="space-y-4">
+        <div className="space-y-6">
           <div className="flex justify-between items-center">
             <div>
               <h3 className="text-lg font-bold text-slate-900">Doctor Prescriptions Ready to Dispense</h3>
-              <p className="text-xs text-slate-500">Click dispense to automatically fulfill student prescriptions and deduct live inventory stock.</p>
+              <p className="text-xs text-slate-500">
+                Fulfill student prescriptions from both Physical OPD Appointments and Online Doctor Consultations. Live medication stock is deducted upon dispense.
+              </p>
             </div>
             <button
               onClick={loadData}
-              className="px-3 py-1.5 bg-slate-100 hover:bg-slate-700 text-slate-700 rounded-lg text-xs font-medium flex items-center"
+              className="px-3 py-1.5 bg-slate-100 hover:bg-slate-700 hover:text-white text-slate-700 rounded-lg text-xs font-medium flex items-center cursor-pointer transition-colors"
             >
               <RefreshCw className="w-3.5 h-3.5 mr-1" /> Refresh Queue
             </button>
           </div>
 
-          {pendingAppointments.length === 0 ? (
-            <div className="bg-white border border-slate-200 rounded-2xl p-8 text-center text-slate-500 text-xs">
-              No pending doctor prescriptions waiting to be dispensed.
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {pendingAppointments.map(apt => (
-                <div key={apt.id} className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm text-slate-900 space-y-3">
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <span className="text-xs font-mono font-bold text-teal-700">{apt.tokenNumber}</span>
-                      <h4 className="text-base font-bold text-slate-900">{apt.studentName} ({apt.rollNumber})</h4>
-                      <p className="text-xs text-slate-500">{apt.department} • {apt.hostelBlock}</p>
-                    </div>
-                    <span className="text-xs text-slate-500 font-medium">Doctor: {apt.doctorName}</span>
-                  </div>
+          {/* SECTION A: ONLINE DOCTOR CONSULTATION PRESCRIPTIONS */}
+          {pendingOnlineConsultations.length > 0 && (
+            <div className="space-y-3">
+              <div className="flex items-center space-x-2">
+                <span className="w-2.5 h-2.5 rounded-full bg-teal-600 animate-pulse"></span>
+                <h4 className="text-sm font-bold text-teal-800 uppercase tracking-wide">
+                  Online Doctor Consultations ({pendingOnlineConsultations.length})
+                </h4>
+              </div>
 
-                  {apt.diagnosis && (
-                    <p className="text-xs text-amber-800 bg-slate-50 p-2.5 rounded-lg border border-slate-200">
-                      <span className="text-slate-500 font-normal">Diagnosis:</span> {apt.diagnosis}
-                    </p>
-                  )}
-
-                  {/* Prescription Table */}
-                  <div className="space-y-2">
-                    <span className="text-xs font-bold text-slate-700 uppercase tracking-wider block">Prescribed Medicines:</span>
-                    <div className="space-y-2">
-                      {apt.prescriptions?.map((p, idx) => (
-                        <div
-                          key={idx}
-                          className="flex flex-col sm:flex-row sm:items-center justify-between p-3 bg-slate-50 rounded-xl border border-slate-200 gap-2 text-xs"
-                        >
-                          <div>
-                            <span className="font-bold text-slate-900">{p.medicineName}</span>
-                            <span className="text-teal-700 font-medium ml-3">{p.dosage} ({p.durationDays} days)</span>
-                            <span className="text-slate-500 ml-3">Qty: {p.quantity}</span>
-                          </div>
-
-                          {p.dispensed ? (
-                            <span className="bg-emerald-50 text-emerald-700 font-bold px-2.5 py-1 rounded-lg text-[10px] uppercase border border-emerald-200">
-                              Already Dispensed
-                            </span>
-                          ) : (
-                            <button
-                              onClick={() => handleDispenseItem(apt.id, p.medicineId, p.quantity)}
-                              className="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-lg text-xs shadow-md transition-all flex items-center"
-                            >
-                              <PackageCheck className="w-3.5 h-3.5 mr-1" /> Dispense Medicine
-                            </button>
-                          )}
+              <div className="space-y-4">
+                {pendingOnlineConsultations.map(consult => (
+                  <div key={consult.id} className="bg-white border-2 border-teal-100 rounded-2xl p-5 shadow-sm text-slate-900 space-y-3">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-mono font-bold text-teal-700 bg-teal-50 px-2 py-0.5 rounded border border-teal-200">
+                            {consult.consultationNumber}
+                          </span>
+                          <span className="text-[10px] uppercase font-bold bg-teal-100 text-teal-800 px-2 py-0.2 rounded-full">
+                            Digital Consultation
+                          </span>
                         </div>
-                      ))}
+                        <h4 className="text-base font-bold text-slate-900 mt-1">
+                          {consult.studentName} ({consult.studentRoll})
+                        </h4>
+                        <p className="text-xs text-slate-500">{consult.department} • Hostel: {consult.hostelBlock}</p>
+                      </div>
+                      <div className="text-right">
+                        <span className="text-xs text-slate-700 font-semibold block">Doctor: {consult.doctorName}</span>
+                        <span className="text-[10px] text-slate-500">{consult.doctorSpecialization}</span>
+                      </div>
+                    </div>
+
+                    {consult.doctorNotes && (
+                      <p className="text-xs text-slate-700 bg-slate-50 p-2.5 rounded-lg border border-slate-200">
+                        <span className="text-slate-500 font-medium">Doctor Notes:</span> {consult.doctorNotes}
+                      </p>
+                    )}
+
+                    {/* Online Prescriptions Table */}
+                    <div className="space-y-2">
+                      <span className="text-xs font-bold text-slate-700 uppercase tracking-wider block">Prescribed Medicines:</span>
+                      <div className="space-y-2">
+                        {consult.prescriptions?.map(p => (
+                          <div
+                            key={p.id}
+                            className="flex flex-col sm:flex-row sm:items-center justify-between p-3 bg-slate-50 rounded-xl border border-slate-200 gap-2 text-xs"
+                          >
+                            <div>
+                              <span className="font-bold text-slate-900">{p.medicineName}</span>
+                              <span className="text-teal-700 font-medium ml-3">{p.dosage} • {p.frequency} ({p.duration})</span>
+                              <span className="text-slate-500 ml-3">Qty: {p.quantity}</span>
+                              {p.instructions && (
+                                <span className="block text-[11px] text-slate-500 mt-0.5">Instructions: {p.instructions}</span>
+                              )}
+                            </div>
+
+                            {p.dispensed ? (
+                              <span className="bg-emerald-50 text-emerald-700 font-bold px-2.5 py-1 rounded-lg text-[10px] uppercase border border-emerald-200">
+                                Already Dispensed
+                              </span>
+                            ) : (
+                              <button
+                                onClick={() => handleDispenseConsultationItem(consult.id, p.id)}
+                                className="px-3.5 py-1.5 bg-teal-600 hover:bg-teal-500 text-white font-bold rounded-lg text-xs shadow-md transition-all flex items-center cursor-pointer"
+                              >
+                                <PackageCheck className="w-3.5 h-3.5 mr-1" /> Dispense from BIT Stock
+                              </button>
+                            )}
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
           )}
+
+          {/* SECTION B: PHYSICAL APPOINTMENTS PRESCRIPTIONS */}
+          <div className="space-y-3">
+            <h4 className="text-sm font-bold text-slate-800 uppercase tracking-wide">
+              Physical OPD Queue Appointments ({pendingAppointments.length})
+            </h4>
+
+            {pendingAppointments.length === 0 && pendingOnlineConsultations.length === 0 ? (
+              <div className="bg-white border border-slate-200 rounded-2xl p-8 text-center text-slate-500 text-xs">
+                No pending doctor prescriptions waiting to be dispensed.
+              </div>
+            ) : pendingAppointments.length === 0 ? (
+              <div className="bg-white border border-slate-200 rounded-xl p-4 text-center text-slate-500 text-xs">
+                No pending physical appointments prescriptions.
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {pendingAppointments.map(apt => (
+                  <div key={apt.id} className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm text-slate-900 space-y-3">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <span className="text-xs font-mono font-bold text-teal-700">{apt.tokenNumber}</span>
+                        <h4 className="text-base font-bold text-slate-900">{apt.studentName} ({apt.rollNumber})</h4>
+                        <p className="text-xs text-slate-500">{apt.department} • {apt.hostelBlock}</p>
+                      </div>
+                      <span className="text-xs text-slate-500 font-medium">Doctor: {apt.doctorName}</span>
+                    </div>
+
+                    {apt.diagnosis && (
+                      <p className="text-xs text-amber-800 bg-slate-50 p-2.5 rounded-lg border border-slate-200">
+                        <span className="text-slate-500 font-normal">Diagnosis:</span> {apt.diagnosis}
+                      </p>
+                    )}
+
+                    {/* Prescription Table */}
+                    <div className="space-y-2">
+                      <span className="text-xs font-bold text-slate-700 uppercase tracking-wider block">Prescribed Medicines:</span>
+                      <div className="space-y-2">
+                        {apt.prescriptions?.map((p, idx) => (
+                          <div
+                            key={idx}
+                            className="flex flex-col sm:flex-row sm:items-center justify-between p-3 bg-slate-50 rounded-xl border border-slate-200 gap-2 text-xs"
+                          >
+                            <div>
+                              <span className="font-bold text-slate-900">{p.medicineName}</span>
+                              <span className="text-teal-700 font-medium ml-3">{p.dosage} ({p.durationDays} days)</span>
+                              <span className="text-slate-500 ml-3">Qty: {p.quantity}</span>
+                            </div>
+
+                            {p.dispensed ? (
+                              <span className="bg-emerald-50 text-emerald-700 font-bold px-2.5 py-1 rounded-lg text-[10px] uppercase border border-emerald-200">
+                                Already Dispensed
+                              </span>
+                            ) : (
+                              <button
+                                onClick={() => handleDispenseItem(apt.id, p.medicineId, p.quantity)}
+                                className="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-lg text-xs shadow-md transition-all flex items-center cursor-pointer"
+                              >
+                                <PackageCheck className="w-3.5 h-3.5 mr-1" /> Dispense Medicine
+                              </button>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       )}
 

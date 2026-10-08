@@ -285,6 +285,49 @@ export async function authenticateWithGoogle(): Promise<{ user: User; token: str
   return { user: userData, token };
 }
 
+// Fetch all users from Firestore
+export async function fetchFirestoreUsers(): Promise<User[]> {
+  try {
+    const snap = await getDocs(collection(db, 'users'));
+    const list: User[] = [];
+    snap.forEach((d) => {
+      list.push(d.data() as User);
+    });
+    return list;
+  } catch (err) {
+    // Permission or offline - fail gracefully
+    return [];
+  }
+}
+
+// Sync user profile to Firestore
+export async function syncUserToFirestore(user: User): Promise<void> {
+  if (!user) return;
+  const docId = user.id || user.rollNumber || user.username || user.email.replace(/[^a-zA-Z0-9_\-]/g, '_');
+  try {
+    await setDoc(doc(db, 'users', docId), user, { merge: true });
+  } catch (err) {
+    console.warn('Firestore user sync notice:', err);
+  }
+}
+
+// Subscribe to Live Users Directory (if admin)
+export function subscribeUsers(callback: (users: User[]) => void): () => void {
+  const collRef = collection(db, 'users');
+  const unsubscribe = onSnapshot(
+    collRef,
+    (snapshot) => {
+      const items: User[] = [];
+      snapshot.forEach((d) => items.push(d.data() as User));
+      callback(items);
+    },
+    (err) => {
+      // Ignore if not permitted
+    }
+  );
+  return unsubscribe;
+}
+
 // Subscribe to Live Appointments
 export function subscribeAppointments(
   callback: (appointments: Appointment[]) => void,
