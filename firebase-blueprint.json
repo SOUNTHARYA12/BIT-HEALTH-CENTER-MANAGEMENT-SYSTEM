@@ -434,6 +434,58 @@
         }
       },
       "required": ["id", "consultationNumber", "studentRoll", "doctorId", "healthConcern", "status"]
+    },
+    "Notification": {
+      "title": "Notification",
+      "description": "Role-specific and system event notifications for students, doctors, pharmacy, and administrators",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique notification identifier",
+          "maxLength": 128
+        },
+        "title": {
+          "type": "string",
+          "description": "Notification subject heading",
+          "maxLength": 128
+        },
+        "message": {
+          "type": "string",
+          "description": "Notification descriptive details",
+          "maxLength": 1000
+        },
+        "category": {
+          "type": "string",
+          "description": "Event categorization",
+          "enum": ["appointment", "consultation", "prescription", "inventory", "system", "emergency"]
+        },
+        "priority": {
+          "type": "string",
+          "description": "Urgency weighting",
+          "enum": ["normal", "urgent", "critical"]
+        },
+        "targetRole": {
+          "type": "string",
+          "description": "Audience role targeting",
+          "enum": ["student", "doctor", "pharmacist", "admin", "all"]
+        },
+        "targetUserId": {
+          "type": "string",
+          "description": "Roll number or staff identifier if personalized",
+          "maxLength": 128
+        },
+        "read": {
+          "type": "boolean",
+          "description": "Acknowledged read status"
+        },
+        "timestamp": {
+          "type": "string",
+          "description": "Event timestamp in ISO format",
+          "maxLength": 64
+        }
+      },
+      "required": ["id", "title", "message", "category", "read", "timestamp"]
     }
   },
   "firestore": {
@@ -460,6 +512,10 @@
     "/stock_logs/{logId}": {
       "schema": "StockLog",
       "description": "Dispensary audit log tracking all dispensing and restocking events"
+    },
+    "/notifications/{notificationId}": {
+      "schema": "Notification",
+      "description": "Role-specific persistent notifications and medical event alerts"
     },
     "/admins/{adminId}": {
       "schema": "Admin",

@@ -11,7 +11,8 @@ import {
   OnlineConsultation,
   ConsultationStatus,
   ChatMessage,
-  ConsultationPrescriptionItem
+  ConsultationPrescriptionItem,
+  AppNotification
 } from '../types';
 import {
   authenticateLocalUser,
@@ -36,7 +37,12 @@ import {
   updateLocalConsultationStatus,
   addLocalChatMessage,
   addLocalConsultationPrescription,
-  dispenseLocalConsultationMedicine
+  dispenseLocalConsultationMedicine,
+  getLocalNotifications,
+  markLocalNotificationRead,
+  markAllLocalNotificationsRead,
+  addLocalNotification,
+  deleteLocalNotification
 } from './localStore';
 import { fetchFirestoreUsers, syncUserToFirestore } from './firebaseService';
 
@@ -731,4 +737,82 @@ export async function dispenseConsultationPrescription(
     // ignore
   }
   return dispenseLocalConsultationMedicine(consultationId, prescriptionItemId, dispenserName);
+}
+
+// ==========================================
+// 8. NOTIFICATION API METHODS
+// ==========================================
+export async function fetchNotifications(params?: {
+  role?: string;
+  userId?: string;
+}): Promise<AppNotification[]> {
+  try {
+    const query = new URLSearchParams();
+    if (params?.role) query.append('role', params.role);
+    if (params?.userId) query.append('userId', params.userId);
+
+    const res = await fetch(`/api/notifications?${query.toString()}`);
+    if (res.ok) {
+      return await res.json();
+    }
+  } catch {
+    // network or offline fallback
+  }
+  return getLocalNotifications(params);
+}
+
+export async function markNotificationRead(id: string): Promise<AppNotification> {
+  // Always update locally for instant responsiveness
+  const localUpdated = markLocalNotificationRead(id);
+  try {
+    const res = await fetch(`/api/notifications/${id}/read`, {
+      method: 'PATCH'
+    });
+    if (res.ok) return await res.json();
+  } catch {
+    // ignore
+  }
+  return localUpdated;
+}
+
+export async function markAllNotificationsRead(params?: {
+  role?: string;
+  userId?: string;
+}): Promise<void> {
+  markAllLocalNotificationsRead(params);
+  try {
+    await fetch('/api/notifications/mark-all-read', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(params || {})
+    });
+  } catch {
+    // ignore
+  }
+}
+
+export async function createNotification(notif: Partial<AppNotification>): Promise<AppNotification> {
+  const localNotif = addLocalNotification(notif);
+  try {
+    const res = await fetch('/api/notifications', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(notif)
+    });
+    if (res.ok) return await res.json();
+  } catch {
+    // ignore
+  }
+  return localNotif;
+}
+
+export async function deleteNotification(id: string): Promise<void> {
+  deleteLocalNotification(id);
+  try {
+    await fetch(`/api/notifications/${id}`, {
+      method: 'DELETE'
+    });
+  } catch {
+    // ignore
+  }
 }

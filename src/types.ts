@@ -193,3 +193,28 @@ export interface OnlineConsultation {
   completedAt?: string;
   rejectionReason?: string;
 }
+
+export type NotificationCategory =
+  | 'appointment'
+  | 'consultation'
+  | 'prescription'
+  | 'inventory'
+  | 'system'
+  | 'emergency';
+
+export type NotificationPriority = 'normal' | 'urgent' | 'critical';
+
+export interface AppNotification {
+  id: string;
+  title: string;
+  message: string;
+  timestamp: string; // ISO date string
+  category: NotificationCategory;
+  priority?: NotificationPriority;
+  targetRole?: 'student' | 'doctor' | 'pharmacist' | 'admin' | 'all';
+  targetUserId?: string; // Roll number or User ID or Doctor ID
+  read: boolean;
+  linkTab?: string; // Tab to navigate to within portal
+  actionLabel?: string;
+  metadata?: Record<string, any>;
+}

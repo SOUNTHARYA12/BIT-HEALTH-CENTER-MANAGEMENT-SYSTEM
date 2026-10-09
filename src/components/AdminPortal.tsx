@@ -28,8 +28,18 @@ import {
   GraduationCap
 } from 'lucide-react';
 
-export const AdminPortal: React.FC = () => {
+interface AdminPortalProps {
+  targetTab?: string;
+}
+
+export const AdminPortal: React.FC<AdminPortalProps> = ({ targetTab }) => {
   const [activeAdminTab, setActiveAdminTab] = useState<'analytics' | 'directory' | 'roster' | 'consultations'>('analytics');
+
+  useEffect(() => {
+    if (targetTab && ['analytics', 'directory', 'roster', 'consultations'].includes(targetTab)) {
+      setActiveAdminTab(targetTab as any);
+    }
+  }, [targetTab]);
   const [stats, setStats] = useState<AnalyticsStats | null>(null);
   const [doctors, setDoctors] = useState<Doctor[]>([]);
   const [criticalInventory, setCriticalInventory] = useState<Medicine[]>([]);

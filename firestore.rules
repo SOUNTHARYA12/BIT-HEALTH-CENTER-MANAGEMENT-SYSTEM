@@ -215,6 +215,23 @@ service cloud.firestore {
       allow delete: if isAdmin() && isValidId(consultationId);
     }
 
+    // Role-specific Notifications
+    match /notifications/{notificationId} {
+      allow read: if isSignedIn() && (
+        isAdmin() ||
+        resource.data.targetRole == 'all' ||
+        (resource.data.targetRole == 'student' && resource.data.targetUserId == request.auth.uid) ||
+        (resource.data.targetRole == 'doctor' && isDoctor()) ||
+        (resource.data.targetRole == 'pharmacist' && isPharmacist())
+      );
+      allow create: if isSignedIn() && isValidId(notificationId);
+      allow update: if isSignedIn() && isValidId(notificationId) && (
+        isAdmin() ||
+        incoming().diff(existing()).affectedKeys().hasOnly(['read'])
+      );
+      allow delete: if isAdmin() && isValidId(notificationId);
+    }
+
     // Connection testing
     match /test/{docId} {
       allow read, write: if true;

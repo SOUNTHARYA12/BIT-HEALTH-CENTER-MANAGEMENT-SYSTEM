@@ -22,6 +22,7 @@ export default function App() {
   const [alertCount, setAlertCount] = useState<number>(0);
   const [initializing, setInitializing] = useState<boolean>(true);
   const [isProfileOpen, setIsProfileOpen] = useState<boolean>(false);
+  const [targetPortalTab, setTargetPortalTab] = useState<string | undefined>(undefined);
 
   // Restore stored session on mount
   useEffect(() => {
@@ -113,6 +114,21 @@ export default function App() {
     return <LoginPage onLoginSuccess={handleLoginSuccess} />;
   }
 
+  const handleNavigateTab = (tab: string) => {
+    // Switch role if needed and allowed
+    if (currentUser?.role === 'admin') {
+      if (['inventory', 'pending_prescriptions', 'logs'].includes(tab)) {
+        setCurrentRole('pharmacist');
+      } else if (['queue', 'online'].includes(tab)) {
+        setCurrentRole('doctor');
+      } else if (['my_tokens', 'prescriptions', 'consultation', 'book'].includes(tab)) {
+        setCurrentRole('student');
+      }
+    }
+    setTargetPortalTab(tab);
+    setTimeout(() => setTargetPortalTab(undefined), 600);
+  };
+
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col font-sans selection:bg-teal-100 selection:text-teal-900">
       {/* Top Navigation */}
@@ -123,14 +139,15 @@ export default function App() {
         onLogout={handleLogout}
         alertCount={alertCount}
         onOpenProfile={() => setIsProfileOpen(true)}
+        onNavigateTab={handleNavigateTab}
       />
 
       {/* Main Content Area */}
       <main className="flex-1 pb-12">
-        {currentRole === 'student' && <StudentPortal currentUser={currentUser} />}
-        {currentRole === 'doctor' && <DoctorPortal currentUser={currentUser} />}
-        {currentRole === 'pharmacist' && <PharmacyPortal />}
-        {currentRole === 'admin' && <AdminPortal />}
+        {currentRole === 'student' && <StudentPortal currentUser={currentUser} targetTab={targetPortalTab} />}
+        {currentRole === 'doctor' && <DoctorPortal currentUser={currentUser} targetTab={targetPortalTab} />}
+        {currentRole === 'pharmacist' && <PharmacyPortal targetTab={targetPortalTab} />}
+        {currentRole === 'admin' && <AdminPortal targetTab={targetPortalTab} />}
       </main>
 
       {/* Profile & Privacy Modal */}

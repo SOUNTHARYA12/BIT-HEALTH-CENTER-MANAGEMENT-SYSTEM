@@ -15,7 +15,8 @@ import {
   OnlineConsultation,
   ConsultationStatus,
   ChatMessage,
-  ConsultationPrescriptionItem
+  ConsultationPrescriptionItem,
+  AppNotification
 } from './src/types.js';
 
 const app = express();
@@ -182,6 +183,244 @@ const DEFAULT_MOCK_USERS: AuthUserRecord[] = [
 
 const DATA_DIR = path.join(process.cwd(), 'data');
 const USERS_FILE = path.join(DATA_DIR, 'users.json');
+const NOTIFICATIONS_FILE = path.join(DATA_DIR, 'notifications.json');
+
+const serverNowMs = Date.now();
+const DEFAULT_SERVER_NOTIFICATIONS: AppNotification[] = [
+  // --- Student Notifications ---
+  {
+    id: 'NOTIF-STU-01',
+    title: 'Appointment Booked Successfully',
+    message: 'Your clinic visit token #BIT-HC-001 has been booked with Dr. R. Sathishkumar for today at 09:00 AM.',
+    timestamp: new Date(serverNowMs - 3600000 * 3.5).toISOString(),
+    category: 'appointment',
+    priority: 'normal',
+    targetRole: 'student',
+    targetUserId: '7376231AD101',
+    read: false,
+    linkTab: 'my_tokens',
+    actionLabel: 'View Token',
+    metadata: { tokenNumber: 'BIT-HC-001' }
+  },
+  {
+    id: 'NOTIF-STU-02',
+    title: 'Upcoming Appointment Reminder',
+    message: 'Reminder: Scheduled consultation in Room 101 (Main Clinic) today at 09:00 AM. Please arrive 5 minutes early.',
+    timestamp: new Date(serverNowMs - 3600000 * 2.8).toISOString(),
+    category: 'appointment',
+    priority: 'urgent',
+    targetRole: 'student',
+    targetUserId: '7376231AD101',
+    read: false,
+    linkTab: 'my_tokens',
+    actionLabel: 'Check Room Info'
+  },
+  {
+    id: 'NOTIF-STU-03',
+    title: 'Prescription Ready for Collection',
+    message: 'Doctor Dr. R. Sathishkumar prescribed Paracetamol 650mg & Cetirizine 10mg. The dispensary has dispensed your medication; ready at counter.',
+    timestamp: new Date(serverNowMs - 3600000 * 1.8).toISOString(),
+    category: 'prescription',
+    priority: 'normal',
+    targetRole: 'student',
+    targetUserId: '7376231AD101',
+    read: false,
+    linkTab: 'prescriptions',
+    actionLabel: 'View Prescription',
+    metadata: { refId: 'BIT-HC-001' }
+  },
+  {
+    id: 'NOTIF-STU-04',
+    title: 'Doctor Replied to Online Consultation',
+    message: 'Dr. R. Sathishkumar has reviewed your cough consultation #BIT-OC-101 and prescribed Cough Syrup (Ascoril D+).',
+    timestamp: new Date(serverNowMs - 3600000 * 0.9).toISOString(),
+    category: 'consultation',
+    priority: 'normal',
+    targetRole: 'student',
+    targetUserId: '7376231AD101',
+    read: false,
+    linkTab: 'consultation',
+    actionLabel: 'Open Chat Room'
+  },
+
+  // --- Doctor Notifications ---
+  {
+    id: 'NOTIF-DOC-01',
+    title: 'New Patient Waiting in Queue',
+    message: 'Patient Siddharth R. (Token #BIT-HC-002) is currently waiting for consultation regarding acute stomach cramps.',
+    timestamp: new Date(serverNowMs - 3600000 * 1.5).toISOString(),
+    category: 'appointment',
+    priority: 'urgent',
+    targetRole: 'doctor',
+    targetUserId: 'DOC-101',
+    read: false,
+    linkTab: 'queue',
+    actionLabel: 'Call Patient'
+  },
+  {
+    id: 'NOTIF-DOC-02',
+    title: 'New Online Consultation Assigned',
+    message: 'Student Kavitha M. submitted Online Consultation request #BIT-OC-101 for dry cough and throat tickle.',
+    timestamp: new Date(serverNowMs - 3600000 * 2.2).toISOString(),
+    category: 'consultation',
+    priority: 'normal',
+    targetRole: 'doctor',
+    targetUserId: 'DOC-101',
+    read: false,
+    linkTab: 'online',
+    actionLabel: 'Review Request'
+  },
+  {
+    id: 'NOTIF-DOC-03',
+    title: 'Upcoming Appointment Assigned',
+    message: 'Praveen Kumar (BIT-HC-004) scheduled for dental / general consult at 11:30 AM.',
+    timestamp: new Date(serverNowMs - 3600000 * 0.5).toISOString(),
+    category: 'appointment',
+    priority: 'normal',
+    targetRole: 'doctor',
+    targetUserId: 'DOC-103',
+    read: false,
+    linkTab: 'queue',
+    actionLabel: 'View Schedule'
+  },
+
+  // --- Pharmacy Notifications ---
+  {
+    id: 'NOTIF-PHARM-01',
+    title: 'Critical Low-Stock Medicine Alert',
+    message: 'Azithromycin 500mg (Batch BIT-2026-AZI) has only 28 units left on Rack B-01 (Minimum threshold is 50). Reorder recommended.',
+    timestamp: new Date(serverNowMs - 3600000 * 4).toISOString(),
+    category: 'inventory',
+    priority: 'critical',
+    targetRole: 'pharmacist',
+    read: false,
+    linkTab: 'inventory',
+    actionLabel: 'View Rack B-01',
+    metadata: { medicineId: 'MED-104' }
+  },
+  {
+    id: 'NOTIF-PHARM-02',
+    title: 'Near-Expiry Medicine Warning',
+    message: 'Ibuprofen 400mg (Batch BIT-2026-IBU) expires in under 60 days on 2026-08-25. 14 units remaining on Rack A-02.',
+    timestamp: new Date(serverNowMs - 3600000 * 3).toISOString(),
+    category: 'inventory',
+    priority: 'urgent',
+    targetRole: 'pharmacist',
+    read: false,
+    linkTab: 'inventory',
+    actionLabel: 'Inspect Batch',
+    metadata: { medicineId: 'MED-106' }
+  },
+  {
+    id: 'NOTIF-PHARM-03',
+    title: 'New Doctor Prescription for Dispensing',
+    message: 'Consultation #BIT-OC-101 has generated a new prescription item: Cough Syrup (Ascoril D+ 100ml) for Kavitha M.',
+    timestamp: new Date(serverNowMs - 3600000 * 0.8).toISOString(),
+    category: 'prescription',
+    priority: 'normal',
+    targetRole: 'pharmacist',
+    read: false,
+    linkTab: 'pending_prescriptions',
+    actionLabel: 'Dispense Item'
+  },
+  {
+    id: 'NOTIF-PHARM-04',
+    title: 'Low-Stock Medicine Alert',
+    message: 'Betadine Antiseptic Ointment 15g is at 12 tubes (Minimum threshold is 20 tubes on Rack D-01).',
+    timestamp: new Date(serverNowMs - 3600000 * 2.5).toISOString(),
+    category: 'inventory',
+    priority: 'urgent',
+    targetRole: 'pharmacist',
+    read: true,
+    linkTab: 'inventory',
+    actionLabel: 'Restock Rack'
+  },
+
+  // --- Admin Notifications ---
+  {
+    id: 'NOTIF-ADM-01',
+    title: 'Dispensary Stock Threshold Warning',
+    message: '3 essential medicines (Azithromycin, Ibuprofen, Betadine) have fallen below campus safety buffer stock levels.',
+    timestamp: new Date(serverNowMs - 3600000 * 3.2).toISOString(),
+    category: 'inventory',
+    priority: 'urgent',
+    targetRole: 'admin',
+    read: false,
+    linkTab: 'analytics',
+    actionLabel: 'View Inventory Health'
+  },
+  {
+    id: 'NOTIF-ADM-02',
+    title: 'Daily OPD Patient Volume Report',
+    message: 'Health Center registration reports 4 student consultations scheduled today with active doctor queue in progress.',
+    timestamp: new Date(serverNowMs - 3600000 * 2).toISOString(),
+    category: 'appointment',
+    priority: 'normal',
+    targetRole: 'admin',
+    read: false,
+    linkTab: 'analytics',
+    actionLabel: 'View Analytics'
+  },
+  {
+    id: 'NOTIF-ADM-03',
+    title: 'Medical Staff OPD Status Update',
+    message: 'Dr. R. Sathishkumar and Dr. P. Deepa are on active duty. 1 student in consultation, 1 waiting in triage queue.',
+    timestamp: new Date(serverNowMs - 3600000 * 1).toISOString(),
+    category: 'system',
+    priority: 'normal',
+    targetRole: 'admin',
+    read: true,
+    linkTab: 'roster',
+    actionLabel: 'View Duty Roster'
+  }
+];
+
+function loadSavedNotifications(): AppNotification[] {
+  ensureDataDir();
+  try {
+    if (fs.existsSync(NOTIFICATIONS_FILE)) {
+      const content = fs.readFileSync(NOTIFICATIONS_FILE, 'utf-8');
+      const parsed = JSON.parse(content);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        return parsed;
+      }
+    }
+  } catch (err) {
+    console.warn('Could not read saved notifications:', err);
+  }
+  return [...DEFAULT_SERVER_NOTIFICATIONS];
+}
+
+function saveNotificationsToDisk(notifs: AppNotification[]) {
+  ensureDataDir();
+  try {
+    fs.writeFileSync(NOTIFICATIONS_FILE, JSON.stringify(notifs, null, 2), 'utf-8');
+  } catch (err) {
+    console.warn('Could not save notifications to disk:', err);
+  }
+}
+
+let serverNotifications: AppNotification[] = loadSavedNotifications();
+
+function sendServerNotification(notif: Partial<AppNotification>): AppNotification {
+  const newNotif: AppNotification = {
+    id: notif.id || `NOTIF-${Date.now().toString().slice(-6)}-${Math.random().toString(36).substring(2, 6)}`,
+    title: notif.title || 'Health Center Notification',
+    message: notif.message || '',
+    timestamp: notif.timestamp || new Date().toISOString(),
+    category: notif.category || 'system',
+    priority: notif.priority || 'normal',
+    targetRole: notif.targetRole || 'all',
+    targetUserId: notif.targetUserId,
+    read: notif.read ?? false,
+    linkTab: notif.linkTab,
+    actionLabel: notif.actionLabel,
+    metadata: notif.metadata
+  };
+  serverNotifications.unshift(newNotif);
+  saveNotificationsToDisk(serverNotifications);
+  return newNotif;
+}
 
 function ensureDataDir() {
   if (!fs.existsSync(DATA_DIR)) {
@@ -1795,6 +2034,79 @@ Respond with ONLY valid JSON without markdown quotes.`;
   };
 
   res.json(result);
+});
+
+// 7. NOTIFICATION SYSTEM REST ENDPOINTS
+app.get('/api/notifications', (req, res) => {
+  const { role, userId } = req.query;
+  let list = [...serverNotifications];
+
+  if (role) {
+    const r = String(role).toLowerCase();
+    const u = userId ? String(userId).toUpperCase() : undefined;
+    list = list.filter(n => {
+      if (!n.targetRole || n.targetRole === 'all') return true;
+      if (n.targetRole.toLowerCase() !== r) return false;
+      if (r === 'student' && n.targetUserId && u) {
+        return n.targetUserId.toUpperCase() === u;
+      }
+      if (r === 'doctor' && n.targetUserId && u) {
+        return n.targetUserId.toUpperCase() === u;
+      }
+      return true;
+    });
+  }
+
+  // Sort latest first
+  list.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+  res.json(list);
+});
+
+app.post('/api/notifications', (req, res) => {
+  const notif = sendServerNotification(req.body);
+  res.status(201).json(notif);
+});
+
+app.patch('/api/notifications/:id/read', (req, res) => {
+  const { id } = req.params;
+  const idx = serverNotifications.findIndex(n => n.id === id);
+  if (idx >= 0) {
+    serverNotifications[idx].read = true;
+    saveNotificationsToDisk(serverNotifications);
+    return res.json(serverNotifications[idx]);
+  }
+  res.status(404).json({ error: 'Notification not found' });
+});
+
+app.post('/api/notifications/mark-all-read', (req, res) => {
+  const { role, userId } = req.body;
+  const r = role ? String(role).toLowerCase() : undefined;
+  const u = userId ? String(userId).toUpperCase() : undefined;
+
+  serverNotifications = serverNotifications.map(n => {
+    if (r) {
+      if (n.targetRole && n.targetRole !== 'all' && n.targetRole.toLowerCase() !== r) {
+        return n;
+      }
+      if (r === 'student' && n.targetUserId && u && n.targetUserId.toUpperCase() !== u) {
+        return n;
+      }
+      if (r === 'doctor' && n.targetUserId && u && n.targetUserId.toUpperCase() !== u) {
+        return n;
+      }
+    }
+    return { ...n, read: true };
+  });
+
+  saveNotificationsToDisk(serverNotifications);
+  res.json({ success: true });
+});
+
+app.delete('/api/notifications/:id', (req, res) => {
+  const { id } = req.params;
+  serverNotifications = serverNotifications.filter(n => n.id !== id);
+  saveNotificationsToDisk(serverNotifications);
+  res.json({ success: true });
 });
 
 

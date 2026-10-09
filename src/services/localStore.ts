@@ -11,7 +11,8 @@ import {
   OnlineConsultation,
   ConsultationStatus,
   ChatMessage,
-  ConsultationPrescriptionItem
+  ConsultationPrescriptionItem,
+  AppNotification
 } from '../types';
 
 interface StoredUserRecord extends User {
@@ -378,6 +379,196 @@ const DEFAULT_LOGS: StockLog[] = [
   }
 ];
 
+const nowMs = Date.now();
+const DEFAULT_NOTIFICATIONS: AppNotification[] = [
+  // --- Student Notifications ---
+  {
+    id: 'NOTIF-STU-01',
+    title: 'Appointment Booked Successfully',
+    message: 'Your clinic visit token #BIT-HC-001 has been booked with Dr. R. Sathishkumar for today at 09:00 AM.',
+    timestamp: new Date(nowMs - 3600000 * 3.5).toISOString(),
+    category: 'appointment',
+    priority: 'normal',
+    targetRole: 'student',
+    targetUserId: '7376231AD101',
+    read: false,
+    linkTab: 'my_tokens',
+    actionLabel: 'View Token',
+    metadata: { tokenNumber: 'BIT-HC-001' }
+  },
+  {
+    id: 'NOTIF-STU-02',
+    title: 'Upcoming Appointment Reminder',
+    message: 'Reminder: Scheduled consultation in Room 101 (Main Clinic) today at 09:00 AM. Please arrive 5 minutes early.',
+    timestamp: new Date(nowMs - 3600000 * 2.8).toISOString(),
+    category: 'appointment',
+    priority: 'urgent',
+    targetRole: 'student',
+    targetUserId: '7376231AD101',
+    read: false,
+    linkTab: 'my_tokens',
+    actionLabel: 'Check Room Info'
+  },
+  {
+    id: 'NOTIF-STU-03',
+    title: 'Prescription Ready for Collection',
+    message: 'Doctor Dr. R. Sathishkumar prescribed Paracetamol 650mg & Cetirizine 10mg. The dispensary has dispensed your medication; ready at counter.',
+    timestamp: new Date(nowMs - 3600000 * 1.8).toISOString(),
+    category: 'prescription',
+    priority: 'normal',
+    targetRole: 'student',
+    targetUserId: '7376231AD101',
+    read: false,
+    linkTab: 'prescriptions',
+    actionLabel: 'View Prescription',
+    metadata: { refId: 'BIT-HC-001' }
+  },
+  {
+    id: 'NOTIF-STU-04',
+    title: 'Doctor Replied to Online Consultation',
+    message: 'Dr. R. Sathishkumar has reviewed your cough consultation #BIT-OC-101 and prescribed Cough Syrup (Ascoril D+).',
+    timestamp: new Date(nowMs - 3600000 * 0.9).toISOString(),
+    category: 'consultation',
+    priority: 'normal',
+    targetRole: 'student',
+    targetUserId: '7376231AD101',
+    read: false,
+    linkTab: 'consultation',
+    actionLabel: 'Open Chat Room'
+  },
+
+  // --- Doctor Notifications ---
+  {
+    id: 'NOTIF-DOC-01',
+    title: 'New Patient Waiting in Queue',
+    message: 'Patient Siddharth R. (Token #BIT-HC-002) is currently waiting for consultation regarding acute stomach cramps.',
+    timestamp: new Date(nowMs - 3600000 * 1.5).toISOString(),
+    category: 'appointment',
+    priority: 'urgent',
+    targetRole: 'doctor',
+    targetUserId: 'DOC-101',
+    read: false,
+    linkTab: 'queue',
+    actionLabel: 'Call Patient'
+  },
+  {
+    id: 'NOTIF-DOC-02',
+    title: 'New Online Consultation Assigned',
+    message: 'Student Kavitha M. submitted Online Consultation request #BIT-OC-101 for dry cough and throat tickle.',
+    timestamp: new Date(nowMs - 3600000 * 2.2).toISOString(),
+    category: 'consultation',
+    priority: 'normal',
+    targetRole: 'doctor',
+    targetUserId: 'DOC-101',
+    read: false,
+    linkTab: 'online',
+    actionLabel: 'Review Request'
+  },
+  {
+    id: 'NOTIF-DOC-03',
+    title: 'Upcoming Appointment Assigned',
+    message: 'Praveen Kumar (BIT-HC-004) scheduled for dental / general consult at 11:30 AM.',
+    timestamp: new Date(nowMs - 3600000 * 0.5).toISOString(),
+    category: 'appointment',
+    priority: 'normal',
+    targetRole: 'doctor',
+    targetUserId: 'DOC-103',
+    read: false,
+    linkTab: 'queue',
+    actionLabel: 'View Schedule'
+  },
+
+  // --- Pharmacy Notifications ---
+  {
+    id: 'NOTIF-PHARM-01',
+    title: 'Critical Low-Stock Medicine Alert',
+    message: 'Azithromycin 500mg (Batch BIT-2026-AZI) has only 28 units left on Rack B-01 (Minimum threshold is 50). Reorder recommended.',
+    timestamp: new Date(nowMs - 3600000 * 4).toISOString(),
+    category: 'inventory',
+    priority: 'critical',
+    targetRole: 'pharmacist',
+    read: false,
+    linkTab: 'inventory',
+    actionLabel: 'View Rack B-01',
+    metadata: { medicineId: 'MED-104' }
+  },
+  {
+    id: 'NOTIF-PHARM-02',
+    title: 'Near-Expiry Medicine Warning',
+    message: 'Ibuprofen 400mg (Batch BIT-2026-IBU) expires in under 60 days on 2026-08-25. 14 units remaining on Rack A-02.',
+    timestamp: new Date(nowMs - 3600000 * 3).toISOString(),
+    category: 'inventory',
+    priority: 'urgent',
+    targetRole: 'pharmacist',
+    read: false,
+    linkTab: 'inventory',
+    actionLabel: 'Inspect Batch',
+    metadata: { medicineId: 'MED-106' }
+  },
+  {
+    id: 'NOTIF-PHARM-03',
+    title: 'New Doctor Prescription for Dispensing',
+    message: 'Consultation #BIT-OC-101 has generated a new prescription item: Cough Syrup (Ascoril D+ 100ml) for Kavitha M.',
+    timestamp: new Date(nowMs - 3600000 * 0.8).toISOString(),
+    category: 'prescription',
+    priority: 'normal',
+    targetRole: 'pharmacist',
+    read: false,
+    linkTab: 'pending_prescriptions',
+    actionLabel: 'Dispense Item'
+  },
+  {
+    id: 'NOTIF-PHARM-04',
+    title: 'Low-Stock Medicine Alert',
+    message: 'Betadine Antiseptic Ointment 15g is at 12 tubes (Minimum threshold is 20 tubes on Rack D-01).',
+    timestamp: new Date(nowMs - 3600000 * 2.5).toISOString(),
+    category: 'inventory',
+    priority: 'urgent',
+    targetRole: 'pharmacist',
+    read: true,
+    linkTab: 'inventory',
+    actionLabel: 'Restock Rack'
+  },
+
+  // --- Admin Notifications ---
+  {
+    id: 'NOTIF-ADM-01',
+    title: 'Dispensary Stock Threshold Warning',
+    message: '3 essential medicines (Azithromycin, Ibuprofen, Betadine) have fallen below campus safety buffer stock levels.',
+    timestamp: new Date(nowMs - 3600000 * 3.2).toISOString(),
+    category: 'inventory',
+    priority: 'urgent',
+    targetRole: 'admin',
+    read: false,
+    linkTab: 'analytics',
+    actionLabel: 'View Inventory Health'
+  },
+  {
+    id: 'NOTIF-ADM-02',
+    title: 'Daily OPD Patient Volume Report',
+    message: 'Health Center registration reports 4 student consultations scheduled today with active doctor queue in progress.',
+    timestamp: new Date(nowMs - 3600000 * 2).toISOString(),
+    category: 'appointment',
+    priority: 'normal',
+    targetRole: 'admin',
+    read: false,
+    linkTab: 'analytics',
+    actionLabel: 'View Analytics'
+  },
+  {
+    id: 'NOTIF-ADM-03',
+    title: 'Medical Staff OPD Status Update',
+    message: 'Dr. R. Sathishkumar and Dr. P. Deepa are on active duty. 1 student in consultation, 1 waiting in triage queue.',
+    timestamp: new Date(nowMs - 3600000 * 1).toISOString(),
+    category: 'system',
+    priority: 'normal',
+    targetRole: 'admin',
+    read: true,
+    linkTab: 'roster',
+    actionLabel: 'View Duty Roster'
+  }
+];
+
 function getStorage<T>(key: string, defaultValue: T): T {
   try {
     const raw = localStorage.getItem(key);
@@ -564,6 +755,41 @@ export function addLocalAppointment(data: Partial<Appointment>): Appointment {
 
   list.unshift(newApt);
   setStorage('bit_hc_appointments', list);
+
+  // Trigger role-specific notifications
+  addLocalNotification({
+    title: 'Appointment Booked Successfully',
+    message: `Your appointment token #${tokenNumber} with ${newApt.doctorName} on ${newApt.appointmentDate} at ${newApt.timeSlot} is confirmed.`,
+    category: 'appointment',
+    priority: 'normal',
+    targetRole: 'student',
+    targetUserId: newApt.rollNumber,
+    linkTab: 'my_tokens',
+    actionLabel: 'View Token',
+    metadata: { tokenNumber, appointmentId: newApt.id }
+  });
+
+  addLocalNotification({
+    title: 'New Patient in Queue',
+    message: `${newApt.studentName} (${newApt.rollNumber}) booked an appointment for ${newApt.timeSlot}. Token: #${tokenNumber}.`,
+    category: 'appointment',
+    priority: newApt.urgency === 'urgent' || newApt.urgency === 'emergency' ? 'urgent' : 'normal',
+    targetRole: 'doctor',
+    targetUserId: newApt.doctorId,
+    linkTab: 'queue',
+    actionLabel: 'Call Patient',
+    metadata: { tokenNumber, appointmentId: newApt.id }
+  });
+
+  addLocalNotification({
+    title: 'New Student Appointment Registered',
+    message: `${newApt.studentName} booked token #${tokenNumber} with ${newApt.doctorName}. Urgency: ${newApt.urgency.toUpperCase()}.`,
+    category: 'appointment',
+    priority: 'normal',
+    targetRole: 'admin',
+    linkTab: 'analytics'
+  });
+
   return newApt;
 }
 
@@ -571,8 +797,54 @@ export function updateLocalAppointment(id: string, updates: Partial<Appointment>
   const list = getLocalAppointments();
   const idx = list.findIndex(a => a.id === id);
   if (idx < 0) throw new Error('Appointment not found');
+  const prevApt = { ...list[idx] };
   list[idx] = { ...list[idx], ...updates, updatedAt: new Date().toISOString() };
   setStorage('bit_hc_appointments', list);
+
+  // Status-change notifications
+  if (updates.status === 'cancelled' && prevApt.status !== 'cancelled') {
+    addLocalNotification({
+      title: 'Appointment Cancelled',
+      message: `Your appointment token #${list[idx].tokenNumber} has been cancelled.`,
+      category: 'appointment',
+      priority: 'urgent',
+      targetRole: 'student',
+      targetUserId: list[idx].rollNumber,
+      linkTab: 'my_tokens'
+    });
+    addLocalNotification({
+      title: 'Appointment Cancelled by Student',
+      message: `Patient ${list[idx].studentName} cancelled appointment token #${list[idx].tokenNumber}.`,
+      category: 'appointment',
+      priority: 'normal',
+      targetRole: 'doctor',
+      targetUserId: list[idx].doctorId,
+      linkTab: 'queue'
+    });
+  }
+
+  if (updates.status === 'completed' && updates.prescriptions && updates.prescriptions.length > 0) {
+    addLocalNotification({
+      title: 'Prescription Issued by Doctor',
+      message: `${list[idx].doctorName} prescribed ${updates.prescriptions.length} medicine(s). Forwarded to dispensary for dispensing.`,
+      category: 'prescription',
+      priority: 'normal',
+      targetRole: 'student',
+      targetUserId: list[idx].rollNumber,
+      linkTab: 'prescriptions',
+      actionLabel: 'View Prescription'
+    });
+    addLocalNotification({
+      title: 'New Prescription Ready for Dispensing',
+      message: `Patient ${list[idx].studentName} (Token #${list[idx].tokenNumber}) has ${updates.prescriptions.length} items prescribed by ${list[idx].doctorName}.`,
+      category: 'prescription',
+      priority: 'normal',
+      targetRole: 'pharmacist',
+      linkTab: 'pending_prescriptions',
+      actionLabel: 'Dispense Medicine'
+    });
+  }
+
   return list[idx];
 }
 
@@ -624,6 +896,45 @@ export function dispenseLocalMedicine(payload: {
   };
   logs.unshift(log);
   setStorage('bit_hc_logs', logs);
+
+  // Check low stock trigger
+  if (med.stockQuantity <= med.minThreshold) {
+    addLocalNotification({
+      title: 'Low-Stock Medicine Alert',
+      message: `${med.name} stock has dropped to ${med.stockQuantity} ${med.unit} (Minimum threshold: ${med.minThreshold}).`,
+      category: 'inventory',
+      priority: med.stockQuantity === 0 ? 'critical' : 'urgent',
+      targetRole: 'pharmacist',
+      linkTab: 'inventory',
+      actionLabel: 'Restock'
+    });
+    addLocalNotification({
+      title: 'Dispensary Low-Stock Alert',
+      message: `${med.name} is low on stock (${med.stockQuantity} left).`,
+      category: 'inventory',
+      priority: 'urgent',
+      targetRole: 'admin',
+      linkTab: 'analytics'
+    });
+  }
+
+  // Notify student if appointmentId provided
+  if (payload.appointmentId) {
+    const apts = getLocalAppointments();
+    const apt = apts.find(a => a.id === payload.appointmentId || a.tokenNumber === payload.appointmentId);
+    if (apt) {
+      addLocalNotification({
+        title: 'Prescription Dispensed at Counter',
+        message: `${med.name} (${payload.quantity} ${med.unit}) has been dispensed and is ready for collection at the counter.`,
+        category: 'prescription',
+        priority: 'normal',
+        targetRole: 'student',
+        targetUserId: apt.rollNumber,
+        linkTab: 'prescriptions',
+        actionLabel: 'View Medication'
+      });
+    }
+  }
 
   return { success: true, newStock: med.stockQuantity, log };
 }
@@ -911,6 +1222,30 @@ export function addLocalConsultation(data: Partial<OnlineConsultation>): OnlineC
 
   list.unshift(newConsultation);
   setStorage('bit_hc_consultations', list);
+
+  // Trigger notifications
+  addLocalNotification({
+    title: 'Online Consultation Requested',
+    message: `Consultation #${consultationNumber} submitted to ${newConsultation.doctorName}. Awaiting doctor review.`,
+    category: 'consultation',
+    priority: 'normal',
+    targetRole: 'student',
+    targetUserId: newConsultation.studentRoll,
+    linkTab: 'consultation',
+    actionLabel: 'View Request'
+  });
+
+  addLocalNotification({
+    title: 'New Online Consultation Assigned',
+    message: `Student ${newConsultation.studentName} (${newConsultation.studentRoll}) requested consultation for: "${newConsultation.healthConcern.slice(0, 80)}..."`,
+    category: 'consultation',
+    priority: 'normal',
+    targetRole: 'doctor',
+    targetUserId: newConsultation.doctorId,
+    linkTab: 'online',
+    actionLabel: 'Open Request'
+  });
+
   return newConsultation;
 }
 
@@ -934,6 +1269,25 @@ export function updateLocalConsultationStatus(
   };
 
   setStorage('bit_hc_consultations', list);
+
+  // Notify student of status update
+  const statusLabels: Record<string, string> = {
+    accepted: 'Accepted by Doctor - Ready for chat',
+    in_consultation: 'Doctor started Consultation',
+    completed: 'Consultation Completed',
+    rejected: 'Consultation Declined'
+  };
+  addLocalNotification({
+    title: `Consultation ${statusLabels[status] || status}`,
+    message: `Online consultation #${list[idx].consultationNumber} with ${list[idx].doctorName} is now ${status.replace('_', ' ')}.`,
+    category: 'consultation',
+    priority: status === 'rejected' ? 'urgent' : 'normal',
+    targetRole: 'student',
+    targetUserId: list[idx].studentRoll,
+    linkTab: 'consultation',
+    actionLabel: 'Open Consultation'
+  });
+
   return list[idx];
 }
 
@@ -963,6 +1317,32 @@ export function addLocalChatMessage(
   list[idx].updatedAt = now;
 
   setStorage('bit_hc_consultations', list);
+
+  // Notify the other party
+  if (msg.senderRole === 'doctor') {
+    addLocalNotification({
+      title: 'Doctor Sent a Message',
+      message: `${msg.senderName}: "${msg.message.slice(0, 90)}..." in consultation #${list[idx].consultationNumber}`,
+      category: 'consultation',
+      priority: 'normal',
+      targetRole: 'student',
+      targetUserId: list[idx].studentRoll,
+      linkTab: 'consultation',
+      actionLabel: 'Reply'
+    });
+  } else {
+    addLocalNotification({
+      title: 'Patient Sent a Message',
+      message: `${msg.senderName}: "${msg.message.slice(0, 90)}..." in consultation #${list[idx].consultationNumber}`,
+      category: 'consultation',
+      priority: 'normal',
+      targetRole: 'doctor',
+      targetUserId: list[idx].doctorId,
+      linkTab: 'online',
+      actionLabel: 'Open Chat'
+    });
+  }
+
   return newMsg;
 }
 
@@ -992,6 +1372,29 @@ export function addLocalConsultationPrescription(
   list[idx].updatedAt = now;
 
   setStorage('bit_hc_consultations', list);
+
+  // Notify Student and Pharmacy
+  addLocalNotification({
+    title: 'New Digital Prescription Added',
+    message: `Doctor prescribed ${item.medicineName} (${item.dosage}, ${item.frequency}) in consultation #${list[idx].consultationNumber}.`,
+    category: 'prescription',
+    priority: 'normal',
+    targetRole: 'student',
+    targetUserId: list[idx].studentRoll,
+    linkTab: 'prescriptions',
+    actionLabel: 'View Medication'
+  });
+
+  addLocalNotification({
+    title: 'Online Prescription Ready for Dispensing',
+    message: `Consultation #${list[idx].consultationNumber} for ${list[idx].studentName} has a new item: ${item.medicineName}.`,
+    category: 'prescription',
+    priority: 'normal',
+    targetRole: 'pharmacist',
+    linkTab: 'pending_prescriptions',
+    actionLabel: 'Dispense Medicine'
+  });
+
   return list[idx];
 }
 
@@ -1069,4 +1472,93 @@ export function dispenseLocalConsultationMedicine(
   setStorage('bit_hc_logs', logs);
 
   return { success: true, newStock, log };
+}
+
+// 7. Notification System Store
+export function getLocalNotifications(params?: { role?: string; userId?: string }): AppNotification[] {
+  let list = getStorage<AppNotification[]>('bit_hc_notifications', DEFAULT_NOTIFICATIONS);
+  if (params?.role) {
+    const role = params.role.toLowerCase();
+    const userId = params.userId?.toUpperCase();
+    list = list.filter(n => {
+      // If notification is global or for all roles
+      if (!n.targetRole || n.targetRole === 'all') {
+        return true;
+      }
+      if (n.targetRole.toLowerCase() !== role) {
+        return false;
+      }
+      // If role matches and targetUserId is specified, check against userId
+      if (role === 'student' && n.targetUserId && userId) {
+        return n.targetUserId.toUpperCase() === userId;
+      }
+      if (role === 'doctor' && n.targetUserId && userId) {
+        return n.targetUserId.toUpperCase() === userId;
+      }
+      return true;
+    });
+  }
+  // Sort latest first
+  return [...list].sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+}
+
+export function addLocalNotification(notif: Partial<AppNotification>): AppNotification {
+  const list = getStorage<AppNotification[]>('bit_hc_notifications', DEFAULT_NOTIFICATIONS);
+  const newNotif: AppNotification = {
+    id: notif.id || `NOTIF-${Date.now().toString().slice(-6)}-${Math.random().toString(36).substring(2, 6)}`,
+    title: notif.title || 'Health Center Notification',
+    message: notif.message || '',
+    timestamp: notif.timestamp || new Date().toISOString(),
+    category: notif.category || 'system',
+    priority: notif.priority || 'normal',
+    targetRole: notif.targetRole || 'all',
+    targetUserId: notif.targetUserId,
+    read: notif.read ?? false,
+    linkTab: notif.linkTab,
+    actionLabel: notif.actionLabel,
+    metadata: notif.metadata
+  };
+  list.unshift(newNotif);
+  setStorage('bit_hc_notifications', list);
+  return newNotif;
+}
+
+export function markLocalNotificationRead(id: string): AppNotification {
+  const list = getStorage<AppNotification[]>('bit_hc_notifications', DEFAULT_NOTIFICATIONS);
+  const idx = list.findIndex(n => n.id === id);
+  if (idx < 0) {
+    // Return a dummy marked notification if not found
+    return { id, title: '', message: '', timestamp: '', category: 'system', read: true };
+  }
+  list[idx] = { ...list[idx], read: true };
+  setStorage('bit_hc_notifications', list);
+  return list[idx];
+}
+
+export function markAllLocalNotificationsRead(params?: { role?: string; userId?: string }): void {
+  let list = getStorage<AppNotification[]>('bit_hc_notifications', DEFAULT_NOTIFICATIONS);
+  const role = params?.role?.toLowerCase();
+  const userId = params?.userId?.toUpperCase();
+
+  list = list.map(n => {
+    if (role) {
+      if (n.targetRole && n.targetRole !== 'all' && n.targetRole.toLowerCase() !== role) {
+        return n;
+      }
+      if (role === 'student' && n.targetUserId && userId && n.targetUserId.toUpperCase() !== userId) {
+        return n;
+      }
+      if (role === 'doctor' && n.targetUserId && userId && n.targetUserId.toUpperCase() !== userId) {
+        return n;
+      }
+    }
+    return { ...n, read: true };
+  });
+  setStorage('bit_hc_notifications', list);
+}
+
+export function deleteLocalNotification(id: string): void {
+  let list = getStorage<AppNotification[]>('bit_hc_notifications', DEFAULT_NOTIFICATIONS);
+  list = list.filter(n => n.id !== id);
+  setStorage('bit_hc_notifications', list);
 }

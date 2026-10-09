@@ -55,9 +55,10 @@ import {
 
 interface DoctorPortalProps {
   currentUser?: User | null;
+  targetTab?: string;
 }
 
-export const DoctorPortal: React.FC<DoctorPortalProps> = ({ currentUser }) => {
+export const DoctorPortal: React.FC<DoctorPortalProps> = ({ currentUser, targetTab }) => {
   const [doctors, setDoctors] = useState<Doctor[]>([]);
   const [selectedDoctorId, setSelectedDoctorId] = useState<string>('');
   const [appointments, setAppointments] = useState<Appointment[]>([]);
@@ -91,6 +92,12 @@ export const DoctorPortal: React.FC<DoctorPortalProps> = ({ currentUser }) => {
 
   // Doctor Tab State: 'queue' (physical appointments) vs 'online' (online consultations)
   const [activeDoctorTab, setActiveDoctorTab] = useState<'queue' | 'online'>('queue');
+
+  useEffect(() => {
+    if (targetTab === 'queue' || targetTab === 'online') {
+      setActiveDoctorTab(targetTab);
+    }
+  }, [targetTab]);
 
   // Online Consultations State
   const [onlineConsultations, setOnlineConsultations] = useState<OnlineConsultation[]>([]);

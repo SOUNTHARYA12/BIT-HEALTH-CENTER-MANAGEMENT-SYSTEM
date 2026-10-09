@@ -29,8 +29,18 @@ import {
   ArrowDownLeft
 } from 'lucide-react';
 
-export const PharmacyPortal: React.FC = () => {
+interface PharmacyPortalProps {
+  targetTab?: string;
+}
+
+export const PharmacyPortal: React.FC<PharmacyPortalProps> = ({ targetTab }) => {
   const [activeTab, setActiveTab] = useState<'inventory' | 'pending_prescriptions' | 'logs'>('inventory');
+
+  useEffect(() => {
+    if (targetTab && ['inventory', 'pending_prescriptions', 'logs'].includes(targetTab)) {
+      setActiveTab(targetTab as any);
+    }
+  }, [targetTab]);
 
   // Loaded Data
   const [inventory, setInventory] = useState<Medicine[]>([]);

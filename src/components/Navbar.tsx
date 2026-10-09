@@ -8,11 +8,9 @@ import {
   User,
   Activity,
   LogOut,
-  UserCheck,
-  Lock,
-  Users,
-  ShieldCheck
+  UserCheck
 } from 'lucide-react';
+import { NotificationDropdown } from './NotificationDropdown';
 
 interface NavbarProps {
   currentUser: UserType | null;
@@ -21,6 +19,7 @@ interface NavbarProps {
   onLogout: () => void;
   alertCount: number;
   onOpenProfile: () => void;
+  onNavigateTab?: (tab: string) => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -29,81 +28,89 @@ export const Navbar: React.FC<NavbarProps> = ({
   onRoleChange,
   onLogout,
   alertCount,
-  onOpenProfile
+  onOpenProfile,
+  onNavigateTab
 }) => {
   const isAdmin = currentUser?.role === 'admin';
 
   return (
-    <header className="bg-white/95 text-slate-900 border-b border-slate-200/90 sticky top-0 z-40 backdrop-blur-md">
+    <header className="bg-white text-slate-900 border-b border-slate-200/90 sticky top-0 z-40 shadow-xs">
       {/* Top Institutional Emergency Bar */}
-      <div className="bg-slate-950 px-4 py-1.5 text-xs text-slate-300 border-b border-slate-800/80">
+      <div className="bg-[#071f38] px-4 sm:px-6 py-1.5 text-xs text-slate-300 border-b border-slate-800/80">
         <div className="max-w-7xl mx-auto flex flex-wrap justify-between items-center gap-2">
           <div className="flex items-center space-x-2.5">
-            <span className="flex items-center text-rose-400 font-semibold tracking-wide">
-              <ShieldAlert className="w-3.5 h-3.5 mr-1.5" />
+            <span className="flex items-center text-rose-400 font-semibold tracking-wide text-[11px] sm:text-xs">
+              <ShieldAlert className="w-3.5 h-3.5 mr-1.5 text-rose-400 animate-pulse" />
               Emergency Casualty: Ext 108 · +91 4295 226000
             </span>
             <span className="hidden sm:inline text-slate-600">/</span>
-            <span className="hidden sm:inline text-slate-400">Campus Health Center, Sathyamangalam</span>
+            <span className="hidden sm:inline text-slate-400 text-[11px]">Campus Health Pavilion, Ground Floor</span>
           </div>
           <div className="flex items-center space-x-3 text-slate-400 text-[11px]">
-            <span>OPD: 8:30 AM – 8:00 PM</span>
+            <span>OPD: 08:30 AM – 08:00 PM</span>
             <span className="text-slate-600">·</span>
-            <span className="text-emerald-400 font-medium flex items-center">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse mr-1"></span>
-              24/7 Casualty Open
+            <span className="text-teal-300 font-semibold flex items-center">
+              <span className="w-1.5 h-1.5 rounded-full bg-teal-400 animate-pulse mr-1.5"></span>
+              24/7 Casualty Support
             </span>
           </div>
         </div>
       </div>
 
       {/* Main Header Bar */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-2.5 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
         {/* Brand / Logo */}
         <div className="flex items-center space-x-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-teal-700 via-teal-600 to-emerald-600 flex items-center justify-center text-white shadow-xs">
-            <HeartPulse className="w-5 h-5 text-white" />
+          <div className="w-10 h-10 rounded-xl bg-[#00897b] flex items-center justify-center text-white shadow-xs shrink-0">
+            <HeartPulse className="w-6 h-6 text-white" strokeWidth={2.4} />
           </div>
           <div>
             <div className="flex items-center space-x-2">
-              <h1 className="text-base sm:text-lg font-bold tracking-tight text-slate-950">
+              <h1 className="text-base sm:text-lg font-extrabold tracking-tight text-[#0a2540] leading-tight">
                 BIT Student Health Center
               </h1>
-              <span className="text-[10px] uppercase font-bold text-teal-800 bg-teal-50 px-2 py-0.5 rounded border border-teal-200/80">
+              <span className="text-[10px] font-bold text-teal-800 bg-teal-50 px-2 py-0.5 rounded-md border border-teal-200">
                 BIT Sathy
               </span>
             </div>
-            <p className="text-xs text-slate-500">
-              Bannari Amman Institute of Technology · Clinical Appointments & Medication Control
+            <p className="text-[11px] text-slate-500 font-medium leading-tight mt-0.5">
+              Bannari Amman Institute of Technology · Clinical Appointments &amp; Medication Control
             </p>
           </div>
         </div>
 
         {/* Right Section: User Profile & Role Nav & Logout */}
         <div className="flex items-center flex-wrap gap-2">
+          {/* Real-time Health Center Notification Bell & Dropdown */}
+          <NotificationDropdown
+            currentUser={currentUser}
+            currentRole={currentRole}
+            onNavigateTab={onNavigateTab}
+          />
+
           {/* User Profile Button */}
           {currentUser && (
             <button
               onClick={onOpenProfile}
               id="navbar-profile-btn"
               title="Click to view health center profile"
-              className="flex items-center space-x-2.5 bg-slate-50 hover:bg-teal-50/70 px-3 py-1.5 rounded-xl border border-slate-200 hover:border-teal-300 text-xs transition-colors cursor-pointer group"
+              className="flex items-center space-x-2.5 bg-slate-50 hover:bg-teal-50/70 px-3 py-1.5 rounded-xl border border-slate-200 hover:border-teal-300 text-xs transition-all cursor-pointer group"
             >
-              <div className="w-7 h-7 rounded-lg bg-teal-100 group-hover:bg-teal-600 text-teal-800 group-hover:text-white flex items-center justify-center font-bold text-xs transition-colors">
+              <div className="w-7 h-7 rounded-lg bg-teal-100 group-hover:bg-[#00897b] text-teal-800 group-hover:text-white flex items-center justify-center font-bold text-xs transition-colors shrink-0">
                 {currentUser.name ? currentUser.name.charAt(0).toUpperCase() : 'U'}
               </div>
               <div className="text-left hidden sm:block">
-                <div className="font-semibold text-slate-900 group-hover:text-teal-900 leading-tight">
+                <div className="font-bold text-slate-900 group-hover:text-teal-900 leading-tight">
                   {currentUser.name}
                 </div>
-                <div className="text-[11px] text-slate-500 font-mono">
-                  {currentUser.rollNumber || currentUser.username} · <span className="capitalize">{currentUser.role}</span>
+                <div className="text-[10px] text-slate-500 font-mono leading-tight">
+                  {currentUser.rollNumber || currentUser.username} · <span className="capitalize font-sans font-medium text-teal-700">{currentUser.role}</span>
                 </div>
               </div>
             </button>
           )}
 
-          {/* Role Navigation: ONLY Admin can switch portals; Non-admins are locked to their own authorized portal */}
+          {/* Role Navigation: ONLY Admin can switch portals */}
           {isAdmin ? (
             <div className="flex items-center space-x-1 bg-slate-100 p-1 rounded-xl border border-slate-200 text-xs overflow-x-auto">
               <button
@@ -111,7 +118,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 onClick={() => onRoleChange('student')}
                 className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg font-semibold transition-colors cursor-pointer ${
                   currentRole === 'student'
-                    ? 'bg-teal-700 text-white shadow-xs'
+                    ? 'bg-[#00897b] text-white shadow-xs'
                     : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
                 }`}
               >
@@ -124,7 +131,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 onClick={() => onRoleChange('doctor')}
                 className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg font-semibold transition-colors cursor-pointer ${
                   currentRole === 'doctor'
-                    ? 'bg-teal-700 text-white shadow-xs'
+                    ? 'bg-[#00897b] text-white shadow-xs'
                     : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
                 }`}
               >
@@ -137,7 +144,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 onClick={() => onRoleChange('pharmacist')}
                 className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg font-semibold transition-colors relative cursor-pointer ${
                   currentRole === 'pharmacist'
-                    ? 'bg-teal-700 text-white shadow-xs'
+                    ? 'bg-[#00897b] text-white shadow-xs'
                     : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
                 }`}
               >
@@ -155,7 +162,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 onClick={() => onRoleChange('admin')}
                 className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg font-semibold transition-colors cursor-pointer ${
                   currentRole === 'admin'
-                    ? 'bg-teal-700 text-white shadow-xs'
+                    ? 'bg-[#00897b] text-white shadow-xs'
                     : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
                 }`}
               >
@@ -166,19 +173,17 @@ export const Navbar: React.FC<NavbarProps> = ({
           ) : (
             /* Non-Admin Portal Indicator & Private Profile Access */
             <div className="flex items-center space-x-2">
-              <div className="flex items-center space-x-1.5 bg-teal-50 border border-teal-200 px-3 py-1.5 rounded-xl text-xs font-semibold text-teal-900">
-                {currentUser?.role === 'student' && <User className="w-3.5 h-3.5 text-teal-700" />}
-                {currentUser?.role === 'doctor' && <Stethoscope className="w-3.5 h-3.5 text-teal-700" />}
-                {currentUser?.role === 'pharmacist' && <Pill className="w-3.5 h-3.5 text-teal-700" />}
-                <span className="capitalize">{currentUser?.role} Portal</span>
-                <span className="text-[10px] bg-teal-200/70 text-teal-950 px-1.5 py-0.2 rounded font-mono">
-                  Authorized
+              <div className="flex items-center space-x-1.5 bg-teal-50 border border-teal-200 px-3 py-1.5 rounded-xl text-xs font-bold text-teal-900">
+                <span className="w-2 h-2 rounded-full bg-teal-500"></span>
+                <span className="capitalize">{currentUser?.role || 'Student'} Portal</span>
+                <span className="text-[10px] bg-teal-200/70 text-teal-950 px-1.5 py-0.5 rounded font-mono font-bold">
+                  Verified
                 </span>
               </div>
 
               <button
                 onClick={onOpenProfile}
-                className="flex items-center space-x-1.5 px-3 py-1.5 bg-white hover:bg-slate-50 text-slate-700 rounded-xl border border-slate-200 text-xs font-semibold transition-colors cursor-pointer shadow-xs"
+                className="flex items-center space-x-1.5 px-3 py-1.5 bg-white hover:bg-slate-50 text-slate-700 rounded-xl border border-slate-200 text-xs font-semibold transition-colors cursor-pointer shadow-2xs"
               >
                 <UserCheck className="w-3.5 h-3.5 text-teal-700" />
                 <span>My Profile</span>
@@ -203,4 +208,3 @@ export const Navbar: React.FC<NavbarProps> = ({
     </header>
   );
 };
-
