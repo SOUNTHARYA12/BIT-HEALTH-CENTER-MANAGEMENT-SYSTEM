@@ -767,7 +767,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
       {/* ========================================================= */}
       {/* RIGHT COLUMN: ~55% Width (Premium Healthcare Hero Section) */}
       {/* ========================================================= */}
-      <div className="w-full lg:w-[55%] xl:w-[56%] relative flex flex-col justify-between p-4 sm:p-6 lg:p-7 xl:p-8 bg-gradient-to-br from-[#f2f9fa] via-[#e9f4f6] to-[#ddf0f2] border-t lg:border-t-0 lg:border-l border-slate-200/80 overflow-hidden">
+      <div className="w-full lg:w-[55%] xl:w-[56%] relative flex flex-col justify-between p-4 sm:p-6 lg:p-7 xl:p-8 bg-gradient-to-br from-[#f2f9fa] via-[#e9f4f6] to-[#ddf0f2] border-t lg:border-t-0 lg:border-l border-slate-200/80 overflow-hidden min-h-full">
         
         {/* Subtle Ambient Background Gradients */}
         <div className="absolute top-0 right-0 w-96 h-96 bg-[#00897b]/5 rounded-full blur-3xl pointer-events-none" />
@@ -776,15 +776,15 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
         {/* 1. Header & Branding Section */}
         <div className="relative z-10 flex flex-col sm:flex-row sm:items-start justify-between gap-3 shrink-0">
           <div>
-            <div className="flex items-center space-x-2 text-[11px] font-bold text-[#00897b] tracking-wider uppercase mb-1">
-              <span className="inline-block w-2 h-2 rounded-full bg-[#00897b]"></span>
+            <div className="flex items-center space-x-2 text-[11px] sm:text-xs font-bold text-[#00897b] tracking-wider uppercase mb-1">
+              <span className="inline-block w-2.5 h-2.5 rounded-full bg-[#00897b]"></span>
               <span>Bannari Amman Institute of Technology</span>
             </div>
             <h2 className="text-2xl sm:text-3xl lg:text-3xl xl:text-4xl font-extrabold tracking-tight leading-tight">
               <span className="text-[#071d36]">Your Health, </span>
               <span className="bg-gradient-to-r from-[#00897b] via-[#00796b] to-[#004d40] bg-clip-text text-transparent">Our Priority</span>
             </h2>
-            <p className="text-xs sm:text-[13px] text-slate-600 mt-1 max-w-md font-medium leading-relaxed">
+            <p className="text-xs sm:text-sm text-slate-600 mt-1 max-w-lg font-medium leading-relaxed">
               Comprehensive healthcare services for a healthier and brighter campus life.
             </p>
           </div>
@@ -793,118 +793,126 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
           <div className="sm:text-right shrink-0 pt-0.5 sm:pt-1">
             <span
               style={{ fontFamily: "'Caveat', cursive" }}
-              className="text-xl sm:text-2xl lg:text-[26px] text-[#00695c] font-bold block transform -rotate-1 select-none whitespace-nowrap drop-shadow-xs"
+              className="text-xl sm:text-2xl lg:text-[27px] text-[#00695c] font-bold block transform -rotate-1 select-none whitespace-nowrap drop-shadow-xs"
             >
               “Healthy Minds, Healthy Campus, Brighter Future”
             </span>
           </div>
         </div>
 
-        {/* 2. Middle Hero Body: Four Service Cards (Left) + Prominent Doctor & Campus (Right) */}
-        <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-5 items-center my-auto py-3">
+        {/* 2. Middle Hero Body: Four Large Service Cards (Left) + Prominent Doctor & Campus (Right) */}
+        <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-5 xl:gap-6 items-stretch flex-1 my-3 sm:my-4">
           
-          {/* Four Healthcare Service Cards */}
-          <div className="lg:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3">
+          {/* Four Healthcare Service Cards (2 x 2 grid, visually larger, comfortable padding) */}
+          <div className="lg:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-3.5 flex flex-col justify-between">
             {/* Card 1: 24/7 Emergency Support */}
             <div
               onClick={() => setActiveFeatureModal('emergency')}
-              className="bg-white/95 hover:bg-white rounded-2xl p-3 sm:p-3.5 border border-slate-200/90 hover:border-teal-400 shadow-[0_4px_16px_-4px_rgba(7,29,54,0.06)] hover:shadow-md transition-all duration-200 cursor-pointer group flex items-start justify-between gap-2"
+              className="bg-white/95 hover:bg-white rounded-2xl p-4 sm:p-4.5 border border-slate-200/90 hover:border-teal-400 shadow-[0_4px_18px_-4px_rgba(7,29,54,0.07)] hover:shadow-md transition-all duration-200 cursor-pointer group flex flex-col justify-between"
             >
-              <div className="flex items-start space-x-2.5 min-w-0">
-                <div className="w-9 h-9 rounded-xl bg-teal-50 group-hover:bg-[#00897b] text-[#00897b] group-hover:text-white flex items-center justify-center shrink-0 transition-colors">
-                  <Ambulance className="w-4 h-4" />
+              <div className="flex items-start justify-between gap-2 mb-2">
+                <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-teal-50 group-hover:bg-[#00897b] text-[#00897b] group-hover:text-white flex items-center justify-center shrink-0 transition-colors shadow-2xs">
+                  <Ambulance className="w-5 h-5" />
                 </div>
-                <div className="min-w-0">
-                  <h3 className="font-bold text-xs sm:text-[13px] text-[#071d36] group-hover:text-[#00897b] transition-colors leading-snug">
-                    24/7 Emergency Support
-                  </h3>
-                  <p className="text-[10px] sm:text-[11px] text-slate-500 font-medium leading-tight mt-0.5">
-                    Immediate ambulance assistance
-                  </p>
+                <div className="w-6 h-6 rounded-full bg-slate-50 group-hover:bg-teal-50 flex items-center justify-center transition-colors">
+                  <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-[#00897b] transition-colors" />
                 </div>
               </div>
-              <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-[#00897b] transition-colors shrink-0 mt-1" />
+              <div>
+                <h3 className="font-bold text-sm sm:text-[15px] text-[#071d36] group-hover:text-[#00897b] transition-colors leading-snug">
+                  24/7 Emergency Support
+                </h3>
+                <p className="text-xs text-slate-500 font-medium leading-relaxed mt-1">
+                  Immediate ambulance assistance &amp; on-call triage
+                </p>
+              </div>
             </div>
 
             {/* Card 2: Easy Appointments */}
             <div
               onClick={() => setActiveFeatureModal('appointments')}
-              className="bg-white/95 hover:bg-white rounded-2xl p-3 sm:p-3.5 border border-slate-200/90 hover:border-teal-400 shadow-[0_4px_16px_-4px_rgba(7,29,54,0.06)] hover:shadow-md transition-all duration-200 cursor-pointer group flex items-start justify-between gap-2"
+              className="bg-white/95 hover:bg-white rounded-2xl p-4 sm:p-4.5 border border-slate-200/90 hover:border-teal-400 shadow-[0_4px_18px_-4px_rgba(7,29,54,0.07)] hover:shadow-md transition-all duration-200 cursor-pointer group flex flex-col justify-between"
             >
-              <div className="flex items-start space-x-2.5 min-w-0">
-                <div className="w-9 h-9 rounded-xl bg-teal-50 group-hover:bg-[#00897b] text-[#00897b] group-hover:text-white flex items-center justify-center shrink-0 transition-colors">
-                  <Calendar className="w-4 h-4" />
+              <div className="flex items-start justify-between gap-2 mb-2">
+                <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-teal-50 group-hover:bg-[#00897b] text-[#00897b] group-hover:text-white flex items-center justify-center shrink-0 transition-colors shadow-2xs">
+                  <Calendar className="w-5 h-5" />
                 </div>
-                <div className="min-w-0">
-                  <h3 className="font-bold text-xs sm:text-[13px] text-[#071d36] group-hover:text-[#00897b] transition-colors leading-snug">
-                    Easy Appointments
-                  </h3>
-                  <p className="text-[10px] sm:text-[11px] text-slate-500 font-medium leading-tight mt-0.5">
-                    Book your slot in minutes
-                  </p>
+                <div className="w-6 h-6 rounded-full bg-slate-50 group-hover:bg-teal-50 flex items-center justify-center transition-colors">
+                  <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-[#00897b] transition-colors" />
                 </div>
               </div>
-              <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-[#00897b] transition-colors shrink-0 mt-1" />
+              <div>
+                <h3 className="font-bold text-sm sm:text-[15px] text-[#071d36] group-hover:text-[#00897b] transition-colors leading-snug">
+                  Easy Appointments
+                </h3>
+                <p className="text-xs text-slate-500 font-medium leading-relaxed mt-1">
+                  Book your slot with campus physicians in minutes
+                </p>
+              </div>
             </div>
 
             {/* Card 3: Medicine Management */}
             <div
               onClick={() => setActiveFeatureModal('medicine')}
-              className="bg-white/95 hover:bg-white rounded-2xl p-3 sm:p-3.5 border border-slate-200/90 hover:border-teal-400 shadow-[0_4px_16px_-4px_rgba(7,29,54,0.06)] hover:shadow-md transition-all duration-200 cursor-pointer group flex items-start justify-between gap-2"
+              className="bg-white/95 hover:bg-white rounded-2xl p-4 sm:p-4.5 border border-slate-200/90 hover:border-teal-400 shadow-[0_4px_18px_-4px_rgba(7,29,54,0.07)] hover:shadow-md transition-all duration-200 cursor-pointer group flex flex-col justify-between"
             >
-              <div className="flex items-start space-x-2.5 min-w-0">
-                <div className="w-9 h-9 rounded-xl bg-teal-50 group-hover:bg-[#00897b] text-[#00897b] group-hover:text-white flex items-center justify-center shrink-0 transition-colors">
-                  <Pill className="w-4 h-4" />
+              <div className="flex items-start justify-between gap-2 mb-2">
+                <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-teal-50 group-hover:bg-[#00897b] text-[#00897b] group-hover:text-white flex items-center justify-center shrink-0 transition-colors shadow-2xs">
+                  <Pill className="w-5 h-5" />
                 </div>
-                <div className="min-w-0">
-                  <h3 className="font-bold text-xs sm:text-[13px] text-[#071d36] group-hover:text-[#00897b] transition-colors leading-snug">
-                    Medicine Management
-                  </h3>
-                  <p className="text-[10px] sm:text-[11px] text-slate-500 font-medium leading-tight mt-0.5">
-                    Safe • Stocked • Ready
-                  </p>
+                <div className="w-6 h-6 rounded-full bg-slate-50 group-hover:bg-teal-50 flex items-center justify-center transition-colors">
+                  <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-[#00897b] transition-colors" />
                 </div>
               </div>
-              <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-[#00897b] transition-colors shrink-0 mt-1" />
+              <div>
+                <h3 className="font-bold text-sm sm:text-[15px] text-[#071d36] group-hover:text-[#00897b] transition-colors leading-snug">
+                  Medicine Management
+                </h3>
+                <p className="text-xs text-slate-500 font-medium leading-relaxed mt-1">
+                  Safe • Stocked • Ready dispensary supplies
+                </p>
+              </div>
             </div>
 
             {/* Card 4: AI Health Triage */}
             <div
               onClick={() => setActiveFeatureModal('triage')}
-              className="bg-white/95 hover:bg-white rounded-2xl p-3 sm:p-3.5 border border-slate-200/90 hover:border-teal-400 shadow-[0_4px_16px_-4px_rgba(7,29,54,0.06)] hover:shadow-md transition-all duration-200 cursor-pointer group flex items-start justify-between gap-2"
+              className="bg-white/95 hover:bg-white rounded-2xl p-4 sm:p-4.5 border border-slate-200/90 hover:border-teal-400 shadow-[0_4px_18px_-4px_rgba(7,29,54,0.07)] hover:shadow-md transition-all duration-200 cursor-pointer group flex flex-col justify-between"
             >
-              <div className="flex items-start space-x-2.5 min-w-0">
-                <div className="w-9 h-9 rounded-xl bg-teal-50 group-hover:bg-[#00897b] text-[#00897b] group-hover:text-white flex items-center justify-center shrink-0 transition-colors">
-                  <Sparkles className="w-4 h-4" />
+              <div className="flex items-start justify-between gap-2 mb-2">
+                <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-teal-50 group-hover:bg-[#00897b] text-[#00897b] group-hover:text-white flex items-center justify-center shrink-0 transition-colors shadow-2xs">
+                  <Sparkles className="w-5 h-5" />
                 </div>
-                <div className="min-w-0">
-                  <h3 className="font-bold text-xs sm:text-[13px] text-[#071d36] group-hover:text-[#00897b] transition-colors leading-snug">
-                    AI Health Triage
-                  </h3>
-                  <p className="text-[10px] sm:text-[11px] text-slate-500 font-medium leading-tight mt-0.5">
-                    Guidance (Non-diagnostic)
-                  </p>
+                <div className="w-6 h-6 rounded-full bg-slate-50 group-hover:bg-teal-50 flex items-center justify-center transition-colors">
+                  <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-[#00897b] transition-colors" />
                 </div>
               </div>
-              <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-[#00897b] transition-colors shrink-0 mt-1" />
+              <div>
+                <h3 className="font-bold text-sm sm:text-[15px] text-[#071d36] group-hover:text-[#00897b] transition-colors leading-snug">
+                  AI Health Triage
+                </h3>
+                <p className="text-xs text-slate-500 font-medium leading-relaxed mt-1">
+                  Symptom guidance &amp; check (Non-diagnostic)
+                </p>
+              </div>
             </div>
           </div>
 
-          {/* Prominent Doctor & Campus Visual (Large, Clear & Professional) */}
-          <div className="lg:col-span-5 relative">
-            <div className="relative rounded-2xl sm:rounded-3xl overflow-hidden shadow-[0_12px_32px_-6px_rgba(7,29,54,0.16)] border-2 border-white bg-white group">
+          {/* Prominent Doctor & Campus Visual (Enlarged, fills available height, clear presence) */}
+          <div className="lg:col-span-5 relative flex flex-col">
+            <div className="relative flex-1 min-h-[260px] sm:min-h-[300px] lg:min-h-[380px] xl:min-h-[420px] rounded-2xl sm:rounded-3xl overflow-hidden shadow-[0_12px_36px_-6px_rgba(7,29,54,0.18)] border-2 border-white bg-white group">
               <img
                 src={campusDoctorHero}
-                alt="Smiling Doctor at BIT Campus Health Center"
-                className="w-full h-52 sm:h-60 lg:h-72 xl:h-80 object-cover object-top transition-transform duration-500 group-hover:scale-105"
+                alt="Doctor at BIT Campus Health Center"
+                className="w-full h-full object-cover object-top transition-transform duration-500 group-hover:scale-105"
               />
-              {/* Subtle Gradient Blend at Image Bottom */}
-              <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-[#071d36]/95 via-[#071d36]/60 to-transparent p-3 pt-7 text-white">
+              {/* Subtle Gradient Blend at Image Bottom with Resident Doctor badge */}
+              <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-[#071d36]/95 via-[#071d36]/65 to-transparent p-3.5 sm:p-4 pt-8 text-white">
                 <div className="flex items-center space-x-1.5">
-                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                  <p className="text-xs font-bold leading-tight text-white">Campus Medical Officers</p>
+                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                  <p className="text-xs sm:text-sm font-bold leading-tight text-white">Campus Medical Officers</p>
                 </div>
-                <p className="text-[10px] text-teal-200 font-medium leading-tight mt-0.5">
+                <p className="text-[11px] sm:text-xs text-teal-200 font-medium leading-tight mt-0.5">
                   Resident Physicians &amp; Health Pavilion Staff
                 </p>
               </div>
