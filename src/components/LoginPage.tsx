@@ -803,97 +803,223 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
         {/* 2. Middle Hero Body: Four Large Service Cards (Left) + Prominent Doctor & Campus (Right) */}
         <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-5 xl:gap-6 items-stretch flex-1 my-3 sm:my-4">
           
-          {/* Four Healthcare Service Cards (2 x 2 grid, visually larger, comfortable padding) */}
+          {/* Four Healthcare Service Cards (2 x 2 grid with custom illustrations and balanced layouts) */}
           <div className="lg:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-3.5 flex flex-col justify-between">
             {/* Card 1: 24/7 Emergency Support */}
             <div
               onClick={() => setActiveFeatureModal('emergency')}
-              className="bg-white/95 hover:bg-white rounded-2xl p-4 sm:p-4.5 border border-slate-200/90 hover:border-teal-400 shadow-[0_4px_18px_-4px_rgba(7,29,54,0.07)] hover:shadow-md transition-all duration-200 cursor-pointer group flex flex-col justify-between"
+              className="bg-white/95 hover:bg-white rounded-2xl p-3.5 sm:p-4 border border-slate-200/90 hover:border-teal-400 shadow-[0_4px_18px_-4px_rgba(7,29,54,0.07)] hover:shadow-md transition-all duration-200 cursor-pointer group flex flex-col justify-between relative overflow-hidden"
             >
-              <div className="flex items-start justify-between gap-2 mb-2">
-                <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-teal-50 group-hover:bg-[#00897b] text-[#00897b] group-hover:text-white flex items-center justify-center shrink-0 transition-colors shadow-2xs">
-                  <Ambulance className="w-5 h-5" />
+              <div className="flex items-start justify-between gap-2">
+                <div className="flex items-center gap-2">
+                  <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-teal-50 group-hover:bg-[#00897b] text-[#00897b] group-hover:text-white flex items-center justify-center shrink-0 transition-colors shadow-2xs">
+                    <Ambulance className="w-5 h-5" />
+                  </div>
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200/70">
+                    Active 24/7
+                  </span>
                 </div>
                 <div className="w-6 h-6 rounded-full bg-slate-50 group-hover:bg-teal-50 flex items-center justify-center transition-colors">
                   <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-[#00897b] transition-colors" />
                 </div>
               </div>
-              <div>
-                <h3 className="font-bold text-sm sm:text-[15px] text-[#071d36] group-hover:text-[#00897b] transition-colors leading-snug">
-                  24/7 Emergency Support
-                </h3>
-                <p className="text-xs text-slate-500 font-medium leading-relaxed mt-1">
-                  Immediate ambulance assistance &amp; on-call triage
-                </p>
+
+              {/* Text on left, Illustration on right */}
+              <div className="flex items-center justify-between gap-2 mt-2">
+                <div className="min-w-0 pr-1">
+                  <h3 className="font-bold text-sm sm:text-[15px] text-[#071d36] group-hover:text-[#00897b] transition-colors leading-snug">
+                    24/7 Emergency Support
+                  </h3>
+                  <p className="text-xs text-slate-500 font-medium leading-relaxed mt-1">
+                    Immediate ambulance assistance, anytime.
+                  </p>
+                </div>
+
+                {/* Medical Shield & Ambulance Illustration */}
+                <div className="shrink-0 w-14 h-14 sm:w-16 sm:h-16 flex items-center justify-center rounded-xl bg-gradient-to-br from-teal-50 to-emerald-50 border border-teal-100/80 group-hover:scale-105 transition-transform duration-300">
+                  <svg className="w-10 h-10 sm:w-11 sm:h-11 drop-shadow-xs" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    {/* Medical Shield */}
+                    <path d="M32 6L48 12V28C48 40 32 54 32 54C32 54 16 40 16 28V12L32 6Z" fill="#E0F2F1" stroke="#00897B" strokeWidth="2.5" strokeLinejoin="round" />
+                    {/* Shield Cross Accent */}
+                    <path d="M32 16V34M23 25H41" stroke="#00897B" strokeWidth="2.5" strokeLinecap="round" />
+                    {/* Mini Ambulance / Siren Pulse */}
+                    <circle cx="44" cy="14" r="3.5" fill="#EF4444" />
+                    <circle cx="44" cy="14" r="5" stroke="#EF4444" strokeWidth="1" strokeDasharray="2 2" className="animate-ping origin-center" />
+                    {/* Ambulance silhouette / badge */}
+                    <rect x="25" y="38" width="14" height="8" rx="2" fill="#004D40" />
+                    <circle cx="28" cy="46" r="1.5" fill="#00897B" />
+                    <circle cx="36" cy="46" r="1.5" fill="#00897B" />
+                  </svg>
+                </div>
               </div>
             </div>
 
             {/* Card 2: Easy Appointments */}
             <div
               onClick={() => setActiveFeatureModal('appointments')}
-              className="bg-white/95 hover:bg-white rounded-2xl p-4 sm:p-4.5 border border-slate-200/90 hover:border-teal-400 shadow-[0_4px_18px_-4px_rgba(7,29,54,0.07)] hover:shadow-md transition-all duration-200 cursor-pointer group flex flex-col justify-between"
+              className="bg-white/95 hover:bg-white rounded-2xl p-3.5 sm:p-4 border border-slate-200/90 hover:border-teal-400 shadow-[0_4px_18px_-4px_rgba(7,29,54,0.07)] hover:shadow-md transition-all duration-200 cursor-pointer group flex flex-col justify-between relative overflow-hidden"
             >
-              <div className="flex items-start justify-between gap-2 mb-2">
-                <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-teal-50 group-hover:bg-[#00897b] text-[#00897b] group-hover:text-white flex items-center justify-center shrink-0 transition-colors shadow-2xs">
-                  <Calendar className="w-5 h-5" />
+              <div className="flex items-start justify-between gap-2">
+                <div className="flex items-center gap-2">
+                  <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-teal-50 group-hover:bg-[#00897b] text-[#00897b] group-hover:text-white flex items-center justify-center shrink-0 transition-colors shadow-2xs">
+                    <Calendar className="w-5 h-5" />
+                  </div>
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-teal-800 bg-teal-50 px-2 py-0.5 rounded-full border border-teal-200/70">
+                    Instant Token
+                  </span>
                 </div>
                 <div className="w-6 h-6 rounded-full bg-slate-50 group-hover:bg-teal-50 flex items-center justify-center transition-colors">
                   <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-[#00897b] transition-colors" />
                 </div>
               </div>
-              <div>
-                <h3 className="font-bold text-sm sm:text-[15px] text-[#071d36] group-hover:text-[#00897b] transition-colors leading-snug">
-                  Easy Appointments
-                </h3>
-                <p className="text-xs text-slate-500 font-medium leading-relaxed mt-1">
-                  Book your slot with campus physicians in minutes
-                </p>
+
+              {/* Text on left, Illustration on right */}
+              <div className="flex items-center justify-between gap-2 mt-2">
+                <div className="min-w-0 pr-1">
+                  <h3 className="font-bold text-sm sm:text-[15px] text-[#071d36] group-hover:text-[#00897b] transition-colors leading-snug">
+                    Easy Appointments
+                  </h3>
+                  <p className="text-xs text-slate-500 font-medium leading-relaxed mt-1">
+                    Book your slot in minutes and save time.
+                  </p>
+                </div>
+
+                {/* Appointment Calendar Illustration */}
+                <div className="shrink-0 w-14 h-14 sm:w-16 sm:h-16 flex items-center justify-center rounded-xl bg-gradient-to-br from-teal-50 to-sky-50 border border-teal-100/80 group-hover:scale-105 transition-transform duration-300">
+                  <svg className="w-10 h-10 sm:w-11 sm:h-11 drop-shadow-xs" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    {/* Calendar Base */}
+                    <rect x="14" y="16" width="36" height="36" rx="6" fill="#FFFFFF" stroke="#00897B" strokeWidth="2.5" />
+                    {/* Calendar Header Bar */}
+                    <path d="M14 24C14 20.6863 16.6863 18 20 18H44C47.3137 18 50 20.6863 50 24V26H14V24Z" fill="#00897B" />
+                    {/* Spiral rings */}
+                    <line x1="22" y1="12" x2="22" y2="18" stroke="#004D40" strokeWidth="2.5" strokeLinecap="round" />
+                    <line x1="42" y1="12" x2="42" y2="18" stroke="#004D40" strokeWidth="2.5" strokeLinecap="round" />
+                    {/* Calendar grid dots */}
+                    <circle cx="23" cy="33" r="1.5" fill="#94A3B8" />
+                    <circle cx="32" cy="33" r="1.5" fill="#94A3B8" />
+                    <circle cx="41" cy="33" r="1.5" fill="#94A3B8" />
+                    <circle cx="23" cy="41" r="1.5" fill="#94A3B8" />
+                    {/* Highlighted Selected Slot with Checkmark */}
+                    <rect x="29" y="38" width="15" height="11" rx="3" fill="#E0F2F1" stroke="#00897B" strokeWidth="1.5" />
+                    <path d="M33 43.5L35.5 46L40 41.5" stroke="#00897B" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </div>
               </div>
             </div>
 
             {/* Card 3: Medicine Management */}
             <div
               onClick={() => setActiveFeatureModal('medicine')}
-              className="bg-white/95 hover:bg-white rounded-2xl p-4 sm:p-4.5 border border-slate-200/90 hover:border-teal-400 shadow-[0_4px_18px_-4px_rgba(7,29,54,0.07)] hover:shadow-md transition-all duration-200 cursor-pointer group flex flex-col justify-between"
+              className="bg-white/95 hover:bg-white rounded-2xl p-3.5 sm:p-4 border border-slate-200/90 hover:border-teal-400 shadow-[0_4px_18px_-4px_rgba(7,29,54,0.07)] hover:shadow-md transition-all duration-200 cursor-pointer group flex flex-col justify-between relative overflow-hidden"
             >
-              <div className="flex items-start justify-between gap-2 mb-2">
-                <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-teal-50 group-hover:bg-[#00897b] text-[#00897b] group-hover:text-white flex items-center justify-center shrink-0 transition-colors shadow-2xs">
-                  <Pill className="w-5 h-5" />
+              <div className="flex items-start justify-between gap-2">
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-teal-50 group-hover:bg-[#00897b] text-[#00897b] group-hover:text-white flex items-center justify-center shrink-0 transition-colors shadow-2xs">
+                    <Pill className="w-5 h-5" />
+                  </div>
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200/70">
+                    ● In Stock
+                  </span>
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-teal-800 bg-teal-50 px-2 py-0.5 rounded-full border border-teal-200/70">
+                    ✓ Expiry Checked
+                  </span>
                 </div>
                 <div className="w-6 h-6 rounded-full bg-slate-50 group-hover:bg-teal-50 flex items-center justify-center transition-colors">
                   <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-[#00897b] transition-colors" />
                 </div>
               </div>
-              <div>
-                <h3 className="font-bold text-sm sm:text-[15px] text-[#071d36] group-hover:text-[#00897b] transition-colors leading-snug">
-                  Medicine Management
-                </h3>
-                <p className="text-xs text-slate-500 font-medium leading-relaxed mt-1">
-                  Safe • Stocked • Ready dispensary supplies
-                </p>
+
+              {/* Text on left, Illustration on right */}
+              <div className="flex items-center justify-between gap-2 mt-2">
+                <div className="min-w-0 pr-1">
+                  <h3 className="font-bold text-sm sm:text-[15px] text-[#071d36] group-hover:text-[#00897b] transition-colors leading-snug">
+                    Medicine Management
+                  </h3>
+                  <p className="text-xs text-slate-500 font-medium leading-relaxed mt-1">
+                    Safe • Stocked • Ready dispensary supplies
+                  </p>
+                </div>
+
+                {/* Medicine Bottle & Tablet Illustration */}
+                <div className="shrink-0 w-14 h-14 sm:w-16 sm:h-16 flex items-center justify-center rounded-xl bg-gradient-to-br from-teal-50 to-emerald-50 border border-teal-100/80 group-hover:scale-105 transition-transform duration-300">
+                  <svg className="w-10 h-10 sm:w-11 sm:h-11 drop-shadow-xs" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    {/* Bottle Cap */}
+                    <rect x="23" y="14" width="14" height="5" rx="1.5" fill="#004D40" />
+                    <rect x="25" y="19" width="10" height="3" fill="#80CBC4" />
+                    {/* Bottle Body */}
+                    <rect x="20" y="22" width="20" height="30" rx="5" fill="#E0F2F1" stroke="#00897B" strokeWidth="2.5" />
+                    {/* Bottle Label & Cross */}
+                    <rect x="24" y="29" width="12" height="14" rx="2" fill="#FFFFFF" />
+                    <path d="M30 32V40M26 36H34" stroke="#00897B" strokeWidth="2" strokeLinecap="round" />
+                    {/* Floating Tablet / Capsule on the right */}
+                    <g transform="rotate(35 45 42)">
+                      <rect x="42" y="34" width="8" height="16" rx="4" fill="#00897B" />
+                      <rect x="42" y="42" width="8" height="8" rx="0" fill="#80CBC4" />
+                      <rect x="42" y="34" width="8" height="16" rx="4" stroke="#004D40" strokeWidth="1.5" />
+                    </g>
+                    {/* Small round pill */}
+                    <circle cx="16" cy="47" r="4.5" fill="#FFFFFF" stroke="#00897B" strokeWidth="2" />
+                    <line x1="13" y1="47" x2="19" y2="47" stroke="#00897B" strokeWidth="1.5" strokeLinecap="round" />
+                  </svg>
+                </div>
               </div>
             </div>
 
             {/* Card 4: AI Health Triage */}
             <div
               onClick={() => setActiveFeatureModal('triage')}
-              className="bg-white/95 hover:bg-white rounded-2xl p-4 sm:p-4.5 border border-slate-200/90 hover:border-teal-400 shadow-[0_4px_18px_-4px_rgba(7,29,54,0.07)] hover:shadow-md transition-all duration-200 cursor-pointer group flex flex-col justify-between"
+              className="bg-white/95 hover:bg-white rounded-2xl p-3.5 sm:p-4 border border-slate-200/90 hover:border-teal-400 shadow-[0_4px_18px_-4px_rgba(7,29,54,0.07)] hover:shadow-md transition-all duration-200 cursor-pointer group flex flex-col justify-between relative overflow-hidden"
             >
-              <div className="flex items-start justify-between gap-2 mb-2">
-                <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-teal-50 group-hover:bg-[#00897b] text-[#00897b] group-hover:text-white flex items-center justify-center shrink-0 transition-colors shadow-2xs">
-                  <Sparkles className="w-5 h-5" />
+              <div className="flex items-start justify-between gap-2">
+                <div className="flex items-center gap-2">
+                  <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-teal-50 group-hover:bg-[#00897b] text-[#00897b] group-hover:text-white flex items-center justify-center shrink-0 transition-colors shadow-2xs">
+                    <Sparkles className="w-5 h-5" />
+                  </div>
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-cyan-800 bg-cyan-50 px-2 py-0.5 rounded-full border border-cyan-200/70">
+                    Non-Diagnostic Guidance
+                  </span>
                 </div>
                 <div className="w-6 h-6 rounded-full bg-slate-50 group-hover:bg-teal-50 flex items-center justify-center transition-colors">
                   <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-[#00897b] transition-colors" />
                 </div>
               </div>
-              <div>
-                <h3 className="font-bold text-sm sm:text-[15px] text-[#071d36] group-hover:text-[#00897b] transition-colors leading-snug">
-                  AI Health Triage
-                </h3>
-                <p className="text-xs text-slate-500 font-medium leading-relaxed mt-1">
-                  Symptom guidance &amp; check (Non-diagnostic)
-                </p>
+
+              {/* Text on left, Illustration on right */}
+              <div className="flex items-center justify-between gap-2 mt-2">
+                <div className="min-w-0 pr-1">
+                  <h3 className="font-bold text-sm sm:text-[15px] text-[#071d36] group-hover:text-[#00897b] transition-colors leading-snug">
+                    AI Health Triage
+                  </h3>
+                  <p className="text-xs text-slate-500 font-medium leading-relaxed mt-1">
+                    Get instant guidance for your symptoms.
+                  </p>
+                </div>
+
+                {/* Friendly AI Healthcare Assistant Illustration */}
+                <div className="shrink-0 w-14 h-14 sm:w-16 sm:h-16 flex items-center justify-center rounded-xl bg-gradient-to-br from-teal-50 to-cyan-50 border border-teal-100/80 group-hover:scale-105 transition-transform duration-300">
+                  <svg className="w-10 h-10 sm:w-11 sm:h-11 drop-shadow-xs" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    {/* Bot Antenna with medical pulse */}
+                    <line x1="32" y1="13" x2="32" y2="19" stroke="#00897B" strokeWidth="2.5" strokeLinecap="round" />
+                    <circle cx="32" cy="11" r="3" fill="#26A69A" />
+                    {/* Bot Head */}
+                    <rect x="18" y="19" width="28" height="24" rx="8" fill="#FFFFFF" stroke="#00897B" strokeWidth="2.5" />
+                    {/* Ear headphones / sensors */}
+                    <rect x="14" y="26" width="4" height="10" rx="2" fill="#00897B" />
+                    <rect x="46" y="26" width="4" height="10" rx="2" fill="#00897B" />
+                    {/* Visor / Face Area */}
+                    <rect x="22" y="24" width="20" height="14" rx="4" fill="#E0F2F1" />
+                    {/* Friendly glowing eyes */}
+                    <circle cx="27" cy="30" r="2.2" fill="#00897B" />
+                    <circle cx="37" cy="30" r="2.2" fill="#00897B" />
+                    {/* Friendly smile */}
+                    <path d="M29 34C30 35.5 34 35.5 35 34" stroke="#00897B" strokeWidth="1.8" strokeLinecap="round" />
+                    {/* Stethoscope on bot collar / body */}
+                    <path d="M26 44V49C26 51 28 53 32 53C36 53 38 51 38 49V44" stroke="#004D40" strokeWidth="2" strokeLinecap="round" />
+                    <circle cx="32" cy="54" r="2" fill="#00897B" />
+                    {/* Sparkle star */}
+                    <path d="M46 16L47.2 19L50.2 20.2L47.2 21.4L46 24.4L44.8 21.4L41.8 20.2L44.8 19L46 16Z" fill="#00897B" />
+                  </svg>
+                </div>
               </div>
             </div>
           </div>
