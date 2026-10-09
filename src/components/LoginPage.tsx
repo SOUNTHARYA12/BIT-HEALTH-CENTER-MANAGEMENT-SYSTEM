@@ -31,7 +31,8 @@ import {
   CheckCircle2,
   HelpCircle,
   Ambulance,
-  Sparkles
+  Sparkles,
+  Check
 } from 'lucide-react';
 
 interface LoginPageProps {
@@ -803,223 +804,367 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
         {/* 2. Middle Hero Body: Four Large Service Cards (Left) + Prominent Doctor & Campus (Right) */}
         <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-5 xl:gap-6 items-stretch flex-1 my-3 sm:my-4">
           
-          {/* Four Healthcare Service Cards (2 x 2 grid with custom illustrations and balanced layouts) */}
+          {/* Four Healthcare Service Cards (2 x 2 grid matching reference specifications) */}
           <div className="lg:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-3.5 flex flex-col justify-between">
-            {/* Card 1: 24/7 Emergency Support */}
+            {/* Card 1: 24/7 Emergency Support (Top Left) */}
             <div
               onClick={() => setActiveFeatureModal('emergency')}
-              className="bg-white/95 hover:bg-white rounded-2xl p-3.5 sm:p-4 border border-slate-200/90 hover:border-teal-400 shadow-[0_4px_18px_-4px_rgba(7,29,54,0.07)] hover:shadow-md transition-all duration-200 cursor-pointer group flex flex-col justify-between relative overflow-hidden"
+              className="bg-white hover:bg-white rounded-2xl p-3.5 sm:p-4 border border-slate-200/90 hover:border-teal-400 shadow-[0_4px_18px_-4px_rgba(7,29,54,0.06)] hover:shadow-lg transition-all duration-200 cursor-pointer group flex flex-col justify-between relative overflow-hidden"
             >
-              <div className="flex items-start justify-between gap-2">
-                <div className="flex items-center gap-2">
-                  <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-teal-50 group-hover:bg-[#00897b] text-[#00897b] group-hover:text-white flex items-center justify-center shrink-0 transition-colors shadow-2xs">
-                    <Ambulance className="w-5 h-5" />
-                  </div>
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200/70">
-                    Active 24/7
-                  </span>
+              {/* Top Row: Teal Medical Shield Icon in Soft Mint Square + Action */}
+              <div className="flex items-center justify-between">
+                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-[#e6f4f1] border border-teal-200/60 text-[#00897b] flex items-center justify-center shrink-0 shadow-2xs group-hover:scale-105 transition-transform">
+                  <ShieldCheck className="w-5 h-5 text-[#00897b]" />
                 </div>
-                <div className="w-6 h-6 rounded-full bg-slate-50 group-hover:bg-teal-50 flex items-center justify-center transition-colors">
-                  <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-[#00897b] transition-colors" />
+                <div className="w-6 h-6 rounded-full bg-slate-50 group-hover:bg-[#e6f4f1] flex items-center justify-center transition-colors">
+                  <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-[#00897b] group-hover:translate-x-0.5 transition-all" />
                 </div>
               </div>
 
-              {/* Text on left, Illustration on right */}
-              <div className="flex items-center justify-between gap-2 mt-2">
-                <div className="min-w-0 pr-1">
-                  <h3 className="font-bold text-sm sm:text-[15px] text-[#071d36] group-hover:text-[#00897b] transition-colors leading-snug">
+              {/* Middle Row: Text on Left, Ambulance Illustration on Right */}
+              <div className="flex items-center justify-between gap-2.5 my-2.5">
+                <div className="min-w-0 flex-1 pr-1">
+                  <h3 className="font-bold text-[14px] sm:text-[15px] xl:text-base text-[#071d36] group-hover:text-[#00897b] transition-colors leading-snug">
                     24/7 Emergency Support
                   </h3>
-                  <p className="text-xs text-slate-500 font-medium leading-relaxed mt-1">
+                  <p className="text-[11px] sm:text-xs text-slate-500 font-medium leading-relaxed mt-1">
                     Immediate ambulance assistance, anytime.
                   </p>
                 </div>
 
-                {/* Medical Shield & Ambulance Illustration */}
-                <div className="shrink-0 w-14 h-14 sm:w-16 sm:h-16 flex items-center justify-center rounded-xl bg-gradient-to-br from-teal-50 to-emerald-50 border border-teal-100/80 group-hover:scale-105 transition-transform duration-300">
-                  <svg className="w-10 h-10 sm:w-11 sm:h-11 drop-shadow-xs" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    {/* Medical Shield */}
-                    <path d="M32 6L48 12V28C48 40 32 54 32 54C32 54 16 40 16 28V12L32 6Z" fill="#E0F2F1" stroke="#00897B" strokeWidth="2.5" strokeLinejoin="round" />
-                    {/* Shield Cross Accent */}
-                    <path d="M32 16V34M23 25H41" stroke="#00897B" strokeWidth="2.5" strokeLinecap="round" />
-                    {/* Mini Ambulance / Siren Pulse */}
-                    <circle cx="44" cy="14" r="3.5" fill="#EF4444" />
-                    <circle cx="44" cy="14" r="5" stroke="#EF4444" strokeWidth="1" strokeDasharray="2 2" className="animate-ping origin-center" />
-                    {/* Ambulance silhouette / badge */}
-                    <rect x="25" y="38" width="14" height="8" rx="2" fill="#004D40" />
-                    <circle cx="28" cy="46" r="1.5" fill="#00897B" />
-                    <circle cx="36" cy="46" r="1.5" fill="#00897B" />
+                {/* Large Ambulance Illustration with Red Medical Cross, Heartbeat Line & Soft Mint Shapes */}
+                <div className="shrink-0 w-20 h-20 sm:w-22 sm:h-22 flex items-center justify-center rounded-2xl bg-gradient-to-br from-[#f0f9f7] via-[#e4f5f1] to-[#d6f0ea] border border-teal-100/90 shadow-2xs group-hover:scale-105 transition-transform duration-300 overflow-hidden relative">
+                  <svg className="w-full h-full" viewBox="0 0 88 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    {/* Soft mint decorative background elements */}
+                    <circle cx="44" cy="40" r="34" fill="#E6F5F2" />
+                    <circle cx="70" cy="22" r="9" fill="#D3EFEA" />
+                    <circle cx="16" cy="54" r="11" fill="#DCF3EE" />
+                    
+                    {/* Soft Mint Medical Shield behind */}
+                    <path d="M44 8L66 17V36C66 51 44 64 44 64C44 64 22 51 22 36V17L44 8Z" fill="#CDEEE8" opacity="0.65" />
+
+                    {/* Flashing Red Emergency Beacon on roof */}
+                    <ellipse cx="44" cy="23" rx="4" ry="2" fill="#EF4444" />
+                    <path d="M41 23L42.5 17H45.5L47 23Z" fill="#EF4444" />
+                    <circle cx="44" cy="18" r="3" fill="#EF4444" />
+                    {/* Beacon pulse rays */}
+                    <line x1="37" y1="15" x2="39" y2="17" stroke="#EF4444" strokeWidth="1.5" strokeLinecap="round" />
+                    <line x1="51" y1="15" x2="49" y2="17" stroke="#EF4444" strokeWidth="1.5" strokeLinecap="round" />
+                    <line x1="44" y1="12" x2="44" y2="14" stroke="#EF4444" strokeWidth="1.5" strokeLinecap="round" />
+
+                    {/* Ambulance Van Chassis */}
+                    <path d="M18 52V30C18 28 19.5 26.5 21.5 26.5H53C54 26.5 55 27 55.5 28L63.5 37C64.5 38 65 39.5 65 41V52C65 53 64 54 63 54H19C18 54 18 53 18 52Z" fill="#FFFFFF" stroke="#004D40" strokeWidth="2.2" strokeLinejoin="round" />
+                    
+                    {/* Windshield */}
+                    <path d="M54 29H54.5L61.5 37.5H54V29Z" fill="#B2EBF2" stroke="#004D40" strokeWidth="1.5" strokeLinejoin="round" />
+                    
+                    {/* Teal Body Stripe */}
+                    <rect x="18" y="41" width="47" height="4.5" fill="#00897B" />
+
+                    {/* Bold Red Medical Cross on Van Side */}
+                    <rect x="31" y="31" width="10" height="3" rx="0.5" fill="#EF4444" />
+                    <rect x="34.5" y="27.5" width="3" height="10" rx="0.5" fill="#EF4444" />
+                    
+                    {/* Wheels */}
+                    <circle cx="28" cy="54" r="6" fill="#1E293B" />
+                    <circle cx="28" cy="54" r="2.8" fill="#80CBC4" stroke="#004D40" strokeWidth="1" />
+                    <circle cx="56" cy="54" r="6" fill="#1E293B" />
+                    <circle cx="56" cy="54" r="2.8" fill="#80CBC4" stroke="#004D40" strokeWidth="1" />
+                    <path d="M22 54H34" stroke="#004D40" strokeWidth="1.5" />
+                    <path d="M50 54H62" stroke="#004D40" strokeWidth="1.5" />
+
+                    {/* Dynamic Red Heartbeat / ECG Line */}
+                    <path d="M6 68H20L24 61L28 73L32 63L35 70L38 68H82" stroke="#EF4444" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
+                    <circle cx="82" cy="68" r="2" fill="#EF4444" />
                   </svg>
                 </div>
               </div>
+
+              {/* Bottom Mint Pill: Help is always close */}
+              <div className="mt-2 pt-2 border-t border-slate-100 flex items-center justify-between">
+                <span className="bg-[#e6f4f1] text-[#00695c] font-semibold text-[11px] sm:text-xs px-2.5 py-1 rounded-full inline-flex items-center gap-1.5 border border-teal-200/60 shadow-2xs">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#00897b] animate-pulse"></span>
+                  Help is always close
+                </span>
+                <span className="text-[11px] text-[#00897b] font-medium opacity-0 group-hover:opacity-100 transition-opacity">
+                  Active 24/7
+                </span>
+              </div>
             </div>
 
-            {/* Card 2: Easy Appointments */}
+            {/* Card 2: Easy Appointments (Top Right) */}
             <div
               onClick={() => setActiveFeatureModal('appointments')}
-              className="bg-white/95 hover:bg-white rounded-2xl p-3.5 sm:p-4 border border-slate-200/90 hover:border-teal-400 shadow-[0_4px_18px_-4px_rgba(7,29,54,0.07)] hover:shadow-md transition-all duration-200 cursor-pointer group flex flex-col justify-between relative overflow-hidden"
+              className="bg-white hover:bg-white rounded-2xl p-3.5 sm:p-4 border border-slate-200/90 hover:border-teal-400 shadow-[0_4px_18px_-4px_rgba(7,29,54,0.06)] hover:shadow-lg transition-all duration-200 cursor-pointer group flex flex-col justify-between relative overflow-hidden"
             >
-              <div className="flex items-start justify-between gap-2">
-                <div className="flex items-center gap-2">
-                  <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-teal-50 group-hover:bg-[#00897b] text-[#00897b] group-hover:text-white flex items-center justify-center shrink-0 transition-colors shadow-2xs">
-                    <Calendar className="w-5 h-5" />
-                  </div>
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-teal-800 bg-teal-50 px-2 py-0.5 rounded-full border border-teal-200/70">
-                    Instant Token
-                  </span>
+              {/* Top Row: Teal Calendar Icon in Soft Mint Square + Action */}
+              <div className="flex items-center justify-between">
+                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-[#e6f4f1] border border-teal-200/60 text-[#00897b] flex items-center justify-center shrink-0 shadow-2xs group-hover:scale-105 transition-transform">
+                  <Calendar className="w-5 h-5 text-[#00897b]" />
                 </div>
-                <div className="w-6 h-6 rounded-full bg-slate-50 group-hover:bg-teal-50 flex items-center justify-center transition-colors">
-                  <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-[#00897b] transition-colors" />
+                <div className="w-6 h-6 rounded-full bg-slate-50 group-hover:bg-[#e6f4f1] flex items-center justify-center transition-colors">
+                  <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-[#00897b] group-hover:translate-x-0.5 transition-all" />
                 </div>
               </div>
 
-              {/* Text on left, Illustration on right */}
-              <div className="flex items-center justify-between gap-2 mt-2">
-                <div className="min-w-0 pr-1">
-                  <h3 className="font-bold text-sm sm:text-[15px] text-[#071d36] group-hover:text-[#00897b] transition-colors leading-snug">
+              {/* Middle Row: Text on Left, Calendar Illustration on Right */}
+              <div className="flex items-center justify-between gap-2.5 my-2.5">
+                <div className="min-w-0 flex-1 pr-1">
+                  <h3 className="font-bold text-[14px] sm:text-[15px] xl:text-base text-[#071d36] group-hover:text-[#00897b] transition-colors leading-snug">
                     Easy Appointments
                   </h3>
-                  <p className="text-xs text-slate-500 font-medium leading-relaxed mt-1">
+                  <p className="text-[11px] sm:text-xs text-slate-500 font-medium leading-relaxed mt-1">
                     Book your slot in minutes and save time.
                   </p>
                 </div>
 
-                {/* Appointment Calendar Illustration */}
-                <div className="shrink-0 w-14 h-14 sm:w-16 sm:h-16 flex items-center justify-center rounded-xl bg-gradient-to-br from-teal-50 to-sky-50 border border-teal-100/80 group-hover:scale-105 transition-transform duration-300">
-                  <svg className="w-10 h-10 sm:w-11 sm:h-11 drop-shadow-xs" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                {/* Large Appointment Calendar Illustration with Selected Date & Time-Slot Buttons */}
+                <div className="shrink-0 w-20 h-20 sm:w-22 sm:h-22 flex items-center justify-center rounded-2xl bg-gradient-to-br from-[#f0f9f7] via-[#e4f5f1] to-[#d6f0ea] border border-teal-100/90 shadow-2xs group-hover:scale-105 transition-transform duration-300 overflow-hidden relative">
+                  <svg className="w-full h-full" viewBox="0 0 88 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    {/* Soft mint decorative background elements */}
+                    <circle cx="44" cy="40" r="34" fill="#E6F5F2" />
+                    <circle cx="18" cy="24" r="10" fill="#D3EFEA" />
+                    <circle cx="74" cy="58" r="8" fill="#DCF3EE" />
+
                     {/* Calendar Base */}
-                    <rect x="14" y="16" width="36" height="36" rx="6" fill="#FFFFFF" stroke="#00897B" strokeWidth="2.5" />
-                    {/* Calendar Header Bar */}
-                    <path d="M14 24C14 20.6863 16.6863 18 20 18H44C47.3137 18 50 20.6863 50 24V26H14V24Z" fill="#00897B" />
-                    {/* Spiral rings */}
-                    <line x1="22" y1="12" x2="22" y2="18" stroke="#004D40" strokeWidth="2.5" strokeLinecap="round" />
-                    <line x1="42" y1="12" x2="42" y2="18" stroke="#004D40" strokeWidth="2.5" strokeLinecap="round" />
-                    {/* Calendar grid dots */}
-                    <circle cx="23" cy="33" r="1.5" fill="#94A3B8" />
-                    <circle cx="32" cy="33" r="1.5" fill="#94A3B8" />
-                    <circle cx="41" cy="33" r="1.5" fill="#94A3B8" />
-                    <circle cx="23" cy="41" r="1.5" fill="#94A3B8" />
-                    {/* Highlighted Selected Slot with Checkmark */}
-                    <rect x="29" y="38" width="15" height="11" rx="3" fill="#E0F2F1" stroke="#00897B" strokeWidth="1.5" />
-                    <path d="M33 43.5L35.5 46L40 41.5" stroke="#00897B" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+                    <rect x="18" y="16" width="46" height="46" rx="7" fill="#FFFFFF" stroke="#004D40" strokeWidth="2.2" />
+                    
+                    {/* Teal Header */}
+                    <path d="M18 23C18 19.5 20.8 16.7 24.3 16.7H57.7C61.2 16.7 64 19.5 64 23V26H18V23Z" fill="#00897B" />
+                    
+                    {/* Binder Spiral Rings */}
+                    <rect x="26" y="12" width="3" height="8" rx="1.5" fill="#004D40" />
+                    <rect x="38" y="12" width="3" height="8" rx="1.5" fill="#004D40" />
+                    <rect x="50" y="12" width="3" height="8" rx="1.5" fill="#004D40" />
+
+                    {/* Calendar Grid dots */}
+                    <circle cx="27" cy="33" r="1.8" fill="#94A3B8" />
+                    <circle cx="36" cy="33" r="1.8" fill="#94A3B8" />
+                    <circle cx="45" cy="33" r="1.8" fill="#94A3B8" />
+                    <circle cx="54" cy="33" r="1.8" fill="#94A3B8" />
+                    <circle cx="27" cy="42" r="1.8" fill="#94A3B8" />
+                    
+                    {/* Highlighted Selected Date: "14" with teal badge */}
+                    <rect x="33" y="37" width="16" height="15" rx="3.5" fill="#00897B" />
+                    <text x="41" y="48" textAnchor="middle" fill="#FFFFFF" fontSize="9" fontWeight="bold" fontFamily="sans-serif">14</text>
+                    
+                    <circle cx="54" cy="42" r="1.8" fill="#94A3B8" />
+                    <circle cx="27" cy="51" r="1.8" fill="#94A3B8" />
+                    <circle cx="54" cy="51" r="1.8" fill="#94A3B8" />
+
+                    {/* Sample Time-Slot Floating Buttons */}
+                    {/* Slot 1: Active 10:00 AM in Teal Pill */}
+                    <g filter="drop-shadow(0px 2px 3px rgba(0,77,64,0.18))">
+                      <rect x="42" y="48" width="40" height="15" rx="7.5" fill="#00897B" stroke="#FFFFFF" strokeWidth="1.2" />
+                      <circle cx="48" cy="55.5" r="2.2" fill="#4ADE80" />
+                      <text x="62" y="59" textAnchor="middle" fill="#FFFFFF" fontSize="7.5" fontWeight="bold" fontFamily="sans-serif">10:00 AM</text>
+                    </g>
+
+                    {/* Slot 2: Sample 02:30 PM in White Pill with Teal Border */}
+                    <g filter="drop-shadow(0px 2px 3px rgba(0,77,64,0.12))">
+                      <rect x="44" y="65" width="38" height="13" rx="6.5" fill="#FFFFFF" stroke="#00897B" strokeWidth="1.2" />
+                      <text x="63" y="74.5" textAnchor="middle" fill="#00695C" fontSize="7" fontWeight="bold" fontFamily="sans-serif">02:30 PM</text>
+                    </g>
                   </svg>
                 </div>
               </div>
+
+              {/* Bottom Mint Pill: Find your next slot */}
+              <div className="mt-2 pt-2 border-t border-slate-100 flex items-center justify-between">
+                <span className="bg-[#e6f4f1] text-[#00695c] font-semibold text-[11px] sm:text-xs px-2.5 py-1 rounded-full inline-flex items-center gap-1.5 border border-teal-200/60 shadow-2xs">
+                  <Calendar className="w-3 h-3 text-[#00897b]" />
+                  Find your next slot
+                </span>
+                <span className="text-[11px] text-[#00897b] font-medium opacity-0 group-hover:opacity-100 transition-opacity">
+                  Instant Token
+                </span>
+              </div>
             </div>
 
-            {/* Card 3: Medicine Management */}
+            {/* Card 3: Medicine Management (Bottom Left) */}
             <div
               onClick={() => setActiveFeatureModal('medicine')}
-              className="bg-white/95 hover:bg-white rounded-2xl p-3.5 sm:p-4 border border-slate-200/90 hover:border-teal-400 shadow-[0_4px_18px_-4px_rgba(7,29,54,0.07)] hover:shadow-md transition-all duration-200 cursor-pointer group flex flex-col justify-between relative overflow-hidden"
+              className="bg-white hover:bg-white rounded-2xl p-3.5 sm:p-4 border border-slate-200/90 hover:border-teal-400 shadow-[0_4px_18px_-4px_rgba(7,29,54,0.06)] hover:shadow-lg transition-all duration-200 cursor-pointer group flex flex-col justify-between relative overflow-hidden"
             >
-              <div className="flex items-start justify-between gap-2">
-                <div className="flex items-center gap-1.5 flex-wrap">
-                  <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-teal-50 group-hover:bg-[#00897b] text-[#00897b] group-hover:text-white flex items-center justify-center shrink-0 transition-colors shadow-2xs">
-                    <Pill className="w-5 h-5" />
-                  </div>
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200/70">
-                    ● In Stock
-                  </span>
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-teal-800 bg-teal-50 px-2 py-0.5 rounded-full border border-teal-200/70">
-                    ✓ Expiry Checked
-                  </span>
+              {/* Top Row: Large Teal Capsule Icon in Soft Mint Square + Action */}
+              <div className="flex items-center justify-between">
+                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-[#e6f4f1] border border-teal-200/60 text-[#00897b] flex items-center justify-center shrink-0 shadow-2xs group-hover:scale-105 transition-transform">
+                  <Pill className="w-5 h-5 text-[#00897b]" />
                 </div>
-                <div className="w-6 h-6 rounded-full bg-slate-50 group-hover:bg-teal-50 flex items-center justify-center transition-colors">
-                  <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-[#00897b] transition-colors" />
+                <div className="w-6 h-6 rounded-full bg-slate-50 group-hover:bg-[#e6f4f1] flex items-center justify-center transition-colors">
+                  <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-[#00897b] group-hover:translate-x-0.5 transition-all" />
                 </div>
               </div>
 
-              {/* Text on left, Illustration on right */}
-              <div className="flex items-center justify-between gap-2 mt-2">
-                <div className="min-w-0 pr-1">
-                  <h3 className="font-bold text-sm sm:text-[15px] text-[#071d36] group-hover:text-[#00897b] transition-colors leading-snug">
+              {/* Middle Row: Text on Left, Detailed Medicine Illustration on Right */}
+              <div className="flex items-center justify-between gap-2.5 my-2.5">
+                <div className="min-w-0 flex-1 pr-1">
+                  <h3 className="font-bold text-[14px] sm:text-[15px] xl:text-base text-[#071d36] group-hover:text-[#00897b] transition-colors leading-snug">
                     Medicine Management
                   </h3>
-                  <p className="text-xs text-slate-500 font-medium leading-relaxed mt-1">
-                    Safe • Stocked • Ready dispensary supplies
+                  <p className="text-[11px] sm:text-xs text-slate-500 font-medium leading-relaxed mt-1">
+                    Safe, stocked and ready for your health.
                   </p>
                 </div>
 
-                {/* Medicine Bottle & Tablet Illustration */}
-                <div className="shrink-0 w-14 h-14 sm:w-16 sm:h-16 flex items-center justify-center rounded-xl bg-gradient-to-br from-teal-50 to-emerald-50 border border-teal-100/80 group-hover:scale-105 transition-transform duration-300">
-                  <svg className="w-10 h-10 sm:w-11 sm:h-11 drop-shadow-xs" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    {/* Bottle Cap */}
-                    <rect x="23" y="14" width="14" height="5" rx="1.5" fill="#004D40" />
-                    <rect x="25" y="19" width="10" height="3" fill="#80CBC4" />
+                {/* Detailed Medicine Illustration with Bottle, Tablets, Capsules & Soft Mint Leaves */}
+                <div className="shrink-0 w-20 h-20 sm:w-22 sm:h-22 flex items-center justify-center rounded-2xl bg-gradient-to-br from-[#f0f9f7] via-[#e4f5f1] to-[#d6f0ea] border border-teal-100/90 shadow-2xs group-hover:scale-105 transition-transform duration-300 overflow-hidden relative">
+                  <svg className="w-full h-full" viewBox="0 0 88 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    {/* Soft mint decorative background elements */}
+                    <circle cx="44" cy="40" r="34" fill="#E6F5F2" />
+                    <circle cx="20" cy="56" r="10" fill="#D3EFEA" />
+                    <circle cx="72" cy="22" r="8" fill="#DCF3EE" />
+
+                    {/* Mint Botanical Leaves arching gently */}
+                    <path d="M12 48C12 36 22 28 30 27C30 36 24 48 12 48Z" fill="#80CBC4" opacity="0.85" />
+                    <path d="M12 48C18 43 24 35 28 29" stroke="#004D40" strokeWidth="1.2" strokeLinecap="round" />
+                    <path d="M18 58C18 48 26 42 32 41C32 49 27 58 18 58Z" fill="#A7F3D0" opacity="0.75" />
+
+                    {/* Medicine Bottle */}
+                    <rect x="33" y="14" width="16" height="6" rx="2" fill="#004D40" />
+                    <line x1="36" y1="16" x2="36" y2="18" stroke="#80CBC4" strokeWidth="1" strokeLinecap="round" />
+                    <line x1="41" y1="16" x2="41" y2="18" stroke="#80CBC4" strokeWidth="1" strokeLinecap="round" />
+                    <line x1="46" y1="16" x2="46" y2="18" stroke="#80CBC4" strokeWidth="1" strokeLinecap="round" />
+                    <rect x="36" y="20" width="10" height="3" fill="#80CBC4" />
+                    
                     {/* Bottle Body */}
-                    <rect x="20" y="22" width="20" height="30" rx="5" fill="#E0F2F1" stroke="#00897B" strokeWidth="2.5" />
-                    {/* Bottle Label & Cross */}
-                    <rect x="24" y="29" width="12" height="14" rx="2" fill="#FFFFFF" />
-                    <path d="M30 32V40M26 36H34" stroke="#00897B" strokeWidth="2" strokeLinecap="round" />
-                    {/* Floating Tablet / Capsule on the right */}
-                    <g transform="rotate(35 45 42)">
-                      <rect x="42" y="34" width="8" height="16" rx="4" fill="#00897B" />
-                      <rect x="42" y="42" width="8" height="8" rx="0" fill="#80CBC4" />
-                      <rect x="42" y="34" width="8" height="16" rx="4" stroke="#004D40" strokeWidth="1.5" />
+                    <rect x="29" y="23" width="24" height="36" rx="6" fill="#E0F2F1" stroke="#004D40" strokeWidth="2.2" />
+                    {/* Bottle Liquid Level */}
+                    <path d="M30 40H52V53C52 56 49.5 58 46.5 58H35.5C32.5 58 30 56 30 53V40Z" fill="#B2DFDB" opacity="0.6" />
+                    
+                    {/* Label & Medical Cross */}
+                    <rect x="33" y="30" width="16" height="18" rx="2.5" fill="#FFFFFF" stroke="#B2DFDB" strokeWidth="1" />
+                    <rect x="36.5" y="38" width="9" height="2.8" rx="0.5" fill="#00897B" />
+                    <rect x="39.6" y="35" width="2.8" height="8.8" rx="0.5" fill="#00897B" />
+
+                    {/* Slanted Two-Tone Capsule (Teal & Mint) */}
+                    <g transform="rotate(32 63 38)">
+                      <rect x="58" y="26" width="10" height="22" rx="5" fill="#00897B" stroke="#004D40" strokeWidth="1.8" />
+                      <path d="M58 37H68V43C68 45.8 65.8 48 63 48C60.2 48 58 45.8 58 43V37Z" fill="#E0F2F1" />
+                      <line x1="58" y1="37" x2="68" y2="37" stroke="#004D40" strokeWidth="1.2" />
+                      <path d="M60 29C60 27.5 61 27 62 27" stroke="#FFFFFF" strokeWidth="1" strokeLinecap="round" opacity="0.8" />
                     </g>
-                    {/* Small round pill */}
-                    <circle cx="16" cy="47" r="4.5" fill="#FFFFFF" stroke="#00897B" strokeWidth="2" />
-                    <line x1="13" y1="47" x2="19" y2="47" stroke="#00897B" strokeWidth="1.5" strokeLinecap="round" />
+
+                    {/* Floating Second Capsule (Navy & Coral) */}
+                    <g transform="rotate(-40 68 58)">
+                      <rect x="64" y="49" width="8" height="17" rx="4" fill="#071D36" stroke="#004D40" strokeWidth="1.4" />
+                      <path d="M64 57.5H72V62C72 64.2 70.2 66 68 66C65.8 66 64 64.2 64 62V57.5Z" fill="#FB7185" />
+                      <line x1="64" y1="57.5" x2="72" y2="57.5" stroke="#FFFFFF" strokeWidth="1" opacity="0.8" />
+                    </g>
+
+                    {/* Round White Scored Tablet */}
+                    <circle cx="24" cy="62" r="6.5" fill="#FFFFFF" stroke="#004D40" strokeWidth="1.8" />
+                    <line x1="19.5" y1="62" x2="28.5" y2="62" stroke="#00897B" strokeWidth="1.5" strokeLinecap="round" />
+                    
+                    {/* Small Mint Tablet */}
+                    <circle cx="56" cy="66" r="4.5" fill="#80CBC4" stroke="#004D40" strokeWidth="1.4" />
                   </svg>
                 </div>
               </div>
-            </div>
 
-            {/* Card 4: AI Health Triage */}
-            <div
-              onClick={() => setActiveFeatureModal('triage')}
-              className="bg-white/95 hover:bg-white rounded-2xl p-3.5 sm:p-4 border border-slate-200/90 hover:border-teal-400 shadow-[0_4px_18px_-4px_rgba(7,29,54,0.07)] hover:shadow-md transition-all duration-200 cursor-pointer group flex flex-col justify-between relative overflow-hidden"
-            >
-              <div className="flex items-start justify-between gap-2">
-                <div className="flex items-center gap-2">
-                  <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-teal-50 group-hover:bg-[#00897b] text-[#00897b] group-hover:text-white flex items-center justify-center shrink-0 transition-colors shadow-2xs">
-                    <Sparkles className="w-5 h-5" />
-                  </div>
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-cyan-800 bg-cyan-50 px-2 py-0.5 rounded-full border border-cyan-200/70">
-                    Non-Diagnostic Guidance
+              {/* Bottom Mint Status Pills: In stock and Expiry checked */}
+              <div className="mt-2 pt-2 border-t border-slate-100 flex items-center justify-between flex-wrap gap-1.5">
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  <span className="bg-[#e6f4f1] text-[#00695c] font-semibold text-[11px] sm:text-xs px-2.5 py-1 rounded-full inline-flex items-center gap-1 border border-teal-200/60 shadow-2xs">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                    In stock
+                  </span>
+                  <span className="bg-[#e6f4f1] text-[#00695c] font-semibold text-[11px] sm:text-xs px-2.5 py-1 rounded-full inline-flex items-center gap-1 border border-teal-200/60 shadow-2xs">
+                    <Check className="w-3 h-3 text-[#00897b]" />
+                    Expiry checked
                   </span>
                 </div>
-                <div className="w-6 h-6 rounded-full bg-slate-50 group-hover:bg-teal-50 flex items-center justify-center transition-colors">
-                  <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-[#00897b] transition-colors" />
+                <span className="text-[11px] text-[#00897b] font-medium opacity-0 group-hover:opacity-100 transition-opacity">
+                  Verified
+                </span>
+              </div>
+            </div>
+
+            {/* Card 4: AI Health Triage (Bottom Right) */}
+            <div
+              onClick={() => setActiveFeatureModal('triage')}
+              className="bg-white hover:bg-white rounded-2xl p-3.5 sm:p-4 border border-slate-200/90 hover:border-teal-400 shadow-[0_4px_18px_-4px_rgba(7,29,54,0.06)] hover:shadow-lg transition-all duration-200 cursor-pointer group flex flex-col justify-between relative overflow-hidden"
+            >
+              {/* Top Row: Friendly Sparkles / Triage Icon in Soft Mint Square + Action */}
+              <div className="flex items-center justify-between">
+                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-[#e6f4f1] border border-teal-200/60 text-[#00897b] flex items-center justify-center shrink-0 shadow-2xs group-hover:scale-105 transition-transform">
+                  <Sparkles className="w-5 h-5 text-[#00897b]" />
+                </div>
+                <div className="w-6 h-6 rounded-full bg-slate-50 group-hover:bg-[#e6f4f1] flex items-center justify-center transition-colors">
+                  <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-[#00897b] group-hover:translate-x-0.5 transition-all" />
                 </div>
               </div>
 
-              {/* Text on left, Illustration on right */}
-              <div className="flex items-center justify-between gap-2 mt-2">
-                <div className="min-w-0 pr-1">
-                  <h3 className="font-bold text-sm sm:text-[15px] text-[#071d36] group-hover:text-[#00897b] transition-colors leading-snug">
+              {/* Middle Row: Text on Left, AI Healthcare Assistant on Right */}
+              <div className="flex items-center justify-between gap-2.5 my-2.5">
+                <div className="min-w-0 flex-1 pr-1">
+                  <h3 className="font-bold text-[14px] sm:text-[15px] xl:text-base text-[#071d36] group-hover:text-[#00897b] transition-colors leading-snug">
                     AI Health Triage
                   </h3>
-                  <p className="text-xs text-slate-500 font-medium leading-relaxed mt-1">
+                  <p className="text-[11px] sm:text-xs text-slate-500 font-medium leading-relaxed mt-1">
                     Get instant guidance for your symptoms.
                   </p>
                 </div>
 
-                {/* Friendly AI Healthcare Assistant Illustration */}
-                <div className="shrink-0 w-14 h-14 sm:w-16 sm:h-16 flex items-center justify-center rounded-xl bg-gradient-to-br from-teal-50 to-cyan-50 border border-teal-100/80 group-hover:scale-105 transition-transform duration-300">
-                  <svg className="w-10 h-10 sm:w-11 sm:h-11 drop-shadow-xs" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    {/* Bot Antenna with medical pulse */}
-                    <line x1="32" y1="13" x2="32" y2="19" stroke="#00897B" strokeWidth="2.5" strokeLinecap="round" />
-                    <circle cx="32" cy="11" r="3" fill="#26A69A" />
-                    {/* Bot Head */}
-                    <rect x="18" y="19" width="28" height="24" rx="8" fill="#FFFFFF" stroke="#00897B" strokeWidth="2.5" />
-                    {/* Ear headphones / sensors */}
-                    <rect x="14" y="26" width="4" height="10" rx="2" fill="#00897B" />
-                    <rect x="46" y="26" width="4" height="10" rx="2" fill="#00897B" />
-                    {/* Visor / Face Area */}
-                    <rect x="22" y="24" width="20" height="14" rx="4" fill="#E0F2F1" />
-                    {/* Friendly glowing eyes */}
-                    <circle cx="27" cy="30" r="2.2" fill="#00897B" />
-                    <circle cx="37" cy="30" r="2.2" fill="#00897B" />
-                    {/* Friendly smile */}
-                    <path d="M29 34C30 35.5 34 35.5 35 34" stroke="#00897B" strokeWidth="1.8" strokeLinecap="round" />
-                    {/* Stethoscope on bot collar / body */}
-                    <path d="M26 44V49C26 51 28 53 32 53C36 53 38 51 38 49V44" stroke="#004D40" strokeWidth="2" strokeLinecap="round" />
-                    <circle cx="32" cy="54" r="2" fill="#00897B" />
-                    {/* Sparkle star */}
-                    <path d="M46 16L47.2 19L50.2 20.2L47.2 21.4L46 24.4L44.8 21.4L41.8 20.2L44.8 19L46 16Z" fill="#00897B" />
+                {/* Friendly AI Healthcare Assistant Illustration with Stethoscope & Screen */}
+                <div className="shrink-0 w-20 h-20 sm:w-22 sm:h-22 flex items-center justify-center rounded-2xl bg-gradient-to-br from-[#f0f9f7] via-[#e4f5f1] to-[#d6f0ea] border border-teal-100/90 shadow-2xs group-hover:scale-105 transition-transform duration-300 overflow-hidden relative">
+                  <svg className="w-full h-full" viewBox="0 0 88 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    {/* Soft mint decorative background elements */}
+                    <circle cx="44" cy="40" r="34" fill="#E6F5F2" />
+                    <circle cx="16" cy="30" r="9" fill="#D3EFEA" />
+                    <circle cx="72" cy="56" r="10" fill="#DCF3EE" />
+
+                    {/* Sparkle Stars */}
+                    <path d="M68 18L69.5 22L73.5 23.5L69.5 25L68 29L66.5 25L62.5 23.5L66.5 22L68 18Z" fill="#00897B" />
+                    <path d="M18 16L19 19L22 20L19 21L18 24L17 21L14 20L17 19L18 16Z" fill="#80CBC4" />
+
+                    {/* Speech Bubble with Medical Pulse */}
+                    <g filter="drop-shadow(0px 2px 3px rgba(0,77,64,0.15))">
+                      <rect x="48" y="10" width="30" height="18" rx="6" fill="#00897B" />
+                      <path d="M54 28L51 33L58 28H54Z" fill="#00897B" />
+                      {/* Pulse inside bubble */}
+                      <path d="M53 19H57L59 15L62 23L64 17L66 20H72" stroke="#FFFFFF" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+                    </g>
+
+                    {/* Robot Antenna */}
+                    <line x1="38" y1="18" x2="38" y2="24" stroke="#004D40" strokeWidth="2.5" strokeLinecap="round" />
+                    <circle cx="38" cy="15" r="3.5" fill="#00897B" />
+                    <circle cx="38" cy="15" r="1.5" fill="#E0F2F1" />
+
+                    {/* Robot Head Body */}
+                    <rect x="22" y="24" width="32" height="26" rx="9" fill="#FFFFFF" stroke="#004D40" strokeWidth="2.4" />
+                    
+                    {/* Side Earcups/Sensors */}
+                    <rect x="18" y="31" width="4.5" height="12" rx="2" fill="#00897B" stroke="#004D40" strokeWidth="1.2" />
+                    <rect x="53.5" y="31" width="4.5" height="12" rx="2" fill="#00897B" stroke="#004D40" strokeWidth="1.2" />
+
+                    {/* Visor Screen */}
+                    <rect x="26" y="28" width="24" height="15" rx="5" fill="#071D36" />
+                    
+                    {/* Friendly Glowing Teal Eyes */}
+                    <circle cx="32" cy="34" r="2.5" fill="#4ADE80" />
+                    <circle cx="44" cy="34" r="2.5" fill="#4ADE80" />
+                    
+                    {/* Friendly Smile */}
+                    <path d="M35 38.5C36.5 40.5 39.5 40.5 41 38.5" stroke="#4ADE80" strokeWidth="1.8" strokeLinecap="round" />
+
+                    {/* Stethoscope draped on collar */}
+                    <path d="M30 50V56C30 60 34 63 38 63C42 63 46 60 46 56V50" stroke="#004D40" strokeWidth="2.2" strokeLinecap="round" />
+                    <line x1="38" y1="63" x2="38" y2="67" stroke="#004D40" strokeWidth="2.2" strokeLinecap="round" />
+                    <circle cx="38" cy="70" r="3.5" fill="#80CBC4" stroke="#004D40" strokeWidth="1.5" />
                   </svg>
                 </div>
+              </div>
+
+              {/* Bottom Mint Pill: Check symptoms safely and Non-diagnostic guidance */}
+              <div className="mt-2 pt-2 border-t border-slate-100 flex items-center justify-between flex-wrap gap-1.5">
+                <span className="bg-[#e6f4f1] text-[#00695c] font-semibold text-[11px] sm:text-xs px-2.5 py-1 rounded-full inline-flex items-center gap-1.5 border border-teal-200/60 shadow-2xs">
+                  <Sparkles className="w-3 h-3 text-[#00897b]" />
+                  Check symptoms safely
+                </span>
+                <span className="text-[10px] text-slate-400 font-medium">
+                  Non-diagnostic
+                </span>
               </div>
             </div>
           </div>
